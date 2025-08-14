@@ -109,7 +109,7 @@
   </header>
 
   <!-- SIDEBAR -->
-  <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-neutral-900 border-r border-white/10 p-4 z-40 transition-transform -translate-x-full">
+  <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-neutral-900 border-r border-white/10 p-4 z-40 transition-transform translate-x-0">
     <div class="font-bold text-lg mb-4">MENU</div>
     <nav class="space-y-4">
         <div>
@@ -161,16 +161,6 @@
       <div id="tickerInner" class="whitespace-nowrap will-change-transform"></div>
     </div>
   </div>
-
-  <!-- script -->
-  <script>
-    const menuBtn = document.getElementById('menuBtn');
-    const sidebar = document.getElementById('sidebar');
-  
-    menuBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('-translate-x-full');
-    });
-  </script>
 
   <script type="text/babel" src="app.js"></script>
 </body>
