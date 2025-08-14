@@ -2,18 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Crypto Price Tracker</title>
+  <title>Crypto Portfolio Tracker</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Crypto Portfolio Tracker</h1>
+  <header>
+    <h1>Crypto Portfolio Tracker</h1>
+    <button id="connectBtn">Connect Wallet</button>
+  </header>
 
-  <button id="connectBtn">Connect Wallet</button>
+  <!-- Info wallet -->
+  <div id="walletInfo" class="wallet-info" style="display:none;">
+    <p><strong>Address:</strong> <span id="walletAddress"></span></p>
+    <p><strong>Balance:</strong> <span id="walletBalance"></span></p>
+  </div>
 
   <!-- Running text untuk top 10 coin -->
   <marquee id="coinMarquee" behavior="scroll" direction="left"></marquee>
 
-  <div id="portfolio"></div>
+  <!-- Top coin list -->
   <div id="topCoins"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.0/dist/ethers.umd.min.js"></script>
