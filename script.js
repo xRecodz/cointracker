@@ -6,23 +6,26 @@ let signer;
 let userAddress;
 
 connectBtn.onclick = async () => {
-    console.log("Tombol Connect diklik"); // debug
-    if (!window.ethereum) {
-        alert("MetaMask belum terpasang!");
+    console.log("Connect button clicked");
+
+    // Prioritas MetaMask, fallback ke OKX
+    const walletProvider = window.ethereum || window.okxwallet;
+
+    if (!walletProvider) {
+        alert("No wallet detected! Please install MetaMask or OKX Wallet.");
         return;
     }
+
     try {
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        signer = provider.getSigner();
+        provider = new ethers.BrowserProvider(walletProvider);
+        signer = await provider.getSigner();
         userAddress = await signer.getAddress();
-        console.log("Wallet address:", userAddress);
+        console.log("Connected:", userAddress);
         loadPortfolio();
     } catch (err) {
-        console.error("Error koneksi:", err);
+        console.error("Error connecting:", err);
     }
 };
-
 
 async function loadPortfolio() {
     const balanceWei = await provider.getBalance(userAddress);
