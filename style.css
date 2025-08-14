@@ -1,69 +1,55 @@
+/* ✅ style.css */
 body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    background-color: #0d1117;
-    color: white;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+  color: white;
+  margin: 0;
+  padding: 0;
 }
 
 header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #161b22;
-    padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  align-items: center;
 }
 
-h1 {
-    margin: 0;
-    font-size: 1.5rem;
+#connectWalletBtn {
+  background: gold;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
-#connectBtn {
-    padding: 10px 20px;
-    background-color: #f4c542; /* kuning */
-    color: black;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s;
+#connectWalletBtn:hover {
+  background: #ffcc00;
 }
 
-#connectBtn:hover {
-    background-color: #ddb434;
+#ticker {
+  background: black;
+  padding: 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
-.wallet-info {
-    background-color: #161b22;
-    margin: 15px;
-    padding: 15px;
-    border-radius: 8px;
+#coinsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
 }
 
-#walletInfo p {
-    margin: 5px 0;
+.coin-card {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  border-radius: 10px;
+  text-align: center;
+  transition: transform 0.2s ease;
 }
 
-#topCoins {
-    margin: 20px;
-}
-
-.coin-item {
-    padding: 10px;
-    border-bottom: 1px solid #333;
-    display: flex;
-    justify-content: space-between;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.coin-item:hover {
-    background-color: #1f2937;
-}
-
-.marquee-coin {
-    margin-right: 20px;
-    cursor: pointer;
-}
-.marquee-coin:hover {
-    text-decoration: underline;
+.coin-card:hover {
+  transform: scale(1.05);
 }
