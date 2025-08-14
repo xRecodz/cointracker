@@ -1,175 +1,457 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crypto Portfolio Tracker</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Crypto Portfolio Tracker</title>
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
 
-  <!-- Tailwind (CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
+<!-- Tailwind (CDN) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
     tailwind.config = {
-      darkMode: 'class',
-      theme: {
+    darkMode: 'class',
+    theme: {
         extend: {
-          fontFamily: { inter: ['Inter', 'system-ui', 'sans-serif'] },
-          colors: {
-            brand: {
-              DEFAULT: '#8B5CF6', // Vibrant purple
-              dark: '#7C3AED',   // Darker purple for hover
-              light: '#A78BFA',  // Lighter purple for accents
-            }
-          }
+        fontFamily: { inter: ['Inter', 'system-ui', 'sans-serif'] },
+        colors: { brand: { DEFAULT: '#F4C542', dark: '#DDB434' } }
         }
-      }
     }
-  </script>
+    }
+</script>
 
-  <!-- React (CDN) -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<!-- React (CDN) -->
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <!-- Ethers v6 (UMD) -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.0/dist/ethers.umd.min.js"></script>
+<!-- Ethers v6 (UMD) -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.8.0/dist/ethers.umd.min.js"></script>
 
-  <!-- Chart.js (sparkline & modal chart) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<!-- Chart.js (sparkline & modal chart) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 
-  <style>
-    /* Hero gradient animation with purple tones */
+<style>
+    /* Hero gradient animation */
     .hero-bg {
-      background: radial-gradient(1200px 600px at 10% -10%, rgba(139, 92, 246, 0.2), transparent 60%),
-                  radial-gradient(1200px 600px at 110% 10%, rgba(124, 58, 237, 0.15), transparent 60%),
-                  linear-gradient(180deg, rgba(255,255,255,0.02), transparent 60%);
-      animation: float 12s ease-in-out infinite alternate;
+    background: radial-gradient(1200px 600px at 10% -10%, rgba(244,197,66,0.2), transparent 60%),
+                radial-gradient(1200px 600px at 110% 10%, rgba(66,153,244,0.15), transparent 60%),
+                linear-gradient(180deg, rgba(255,255,255,0.02), transparent 60%);
+    animation: float 12s ease-in-out infinite alternate;
     }
     @keyframes float {
-      from { background-position: 0 0, 0 0, 0 0; }
-      to   { background-position: 20px -20px, -30px 30px, 0 0; }
+    from { background-position: 0 0, 0 0, 0 0; }
+    to   { background-position: 20px -20px, -30px 30px, 0 0; }
     }
-    /* Subtle scrollbar */
-    ::-webkit-scrollbar { height: 8px; width: 8px; }
-    ::-webkit-scrollbar-thumb { background: #3b3f45; border-radius: 8px; }
+    /* subtle scrollbar */
+    ::-webkit-scrollbar{height:8px;width:8px}
+    ::-webkit-scrollbar-thumb{background:#3b3f45;border-radius:8px}
     .shadow-soft { box-shadow: 0 6px 24px rgba(0,0,0,.15); }
-  </style>
+</style>
 </head>
 <body class="bg-neutral-950 text-neutral-100 font-inter selection:bg-brand/30 selection:text-neutral-900">
-  <!-- Header -->
-  <header class="sticky top-0 z-30 backdrop-blur bg-neutral-950/70 border-b border-white/5">
+
+<!-- Header -->
+<header class="sticky top-0 z-30 backdrop-blur bg-neutral-950/70 border-b border-white/5">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-      <div class="flex items-center gap-3">
+    <div class="flex items-center gap-3">
         <div class="h-8 w-8 rounded-xl bg-brand/90 ring-2 ring-brand/40 grid place-items-center text-neutral-900 font-extrabold">Ξ</div>
         <span class="font-semibold tracking-tight">Crypto Portfolio Tracker</span>
-      </div>
-      <div class="ml-auto flex items-center gap-2">
-        <select id="chainSelect" class="bg-neutral-900 border border-white/10 rounded-xl px-3 py-2 text-sm">
-          <option value="ethereum|ethereum|ETH">Ethereum</option>
-          <option value="bsc|binancecoin|BNB">BSC</option>
-          <option value="polygon|matic-network|MATIC">Polygon</option>
-        </select>
-        <button id="themeToggle" class="rounded-xl px-3 py-2 text-sm bg-neutral-900 border border-white/10 hover:bg-neutral-800 transition">
-          ☀️ / 🌙
-        </button>
-        <button id="connectBtn" class="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold bg-brand text-neutral-900 hover:bg-brand-dark transition shadow-soft">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 7h-7a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h7v2h-7a7 7 0 0 1 0-14h7v2z"/><circle cx="17" cy="12" r="1.5" fill="#111"/></svg>
-          <span>Connect Wallet</span>
-        </button>
-      </div>
     </div>
-  </header>
 
-  <!-- Hero Section -->
-  <section class="hero-bg">
+    <div class="ml-auto flex items-center gap-2">
+        <!-- Chain selector -->
+        <select id="chainSelect" class="bg-neutral-900 border border-white/10 rounded-xl px-3 py-2 text-sm">
+        <option value="ethereum|ethereum|ETH">Ethereum</option>
+        <option value="bsc|binancecoin|BNB">BSC</option>
+        <option value="polygon|matic-network|MATIC">Polygon</option>
+        </select>
+
+        <!-- Theme toggle -->
+        <button id="themeToggle" class="rounded-xl px-3 py-2 text-sm bg-neutral-900 border border-white/10 hover:bg-neutral-800 transition">
+        ☀️ / 🌙
+        </button>
+
+        <!-- Connect / Disconnect -->
+        <button id="connectBtn" class="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold bg-brand text-neutral-900 hover:bg-brand-dark transition shadow-soft">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 7h-7a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h7v2h-7a7 7 0 0 1 0-14h7v2z"/><circle cx="17" cy="12" r="1.5" fill="#111"/></svg>
+        <span>Connect Wallet</span>
+        </button>
+    </div>
+    </div>
+</header>
+
+<!-- Hero -->
+<section class="hero-bg">
     <div class="max-w-7xl mx-auto px-4 py-10 md:py-14">
-      <div class="rounded-2xl border border-white/10 bg-neutral-900/40 p-6 md:p-8">
+    <div class="rounded-2xl border border-white/10 bg-neutral-900/40 p-6 md:p-8">
         <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Track your portfolio in real-time.</h1>
         <p class="text-neutral-300 mt-2">Live prices, beautiful charts, and Web3 wallet integration — ready for your portfolio.</p>
+
+        <!-- Wallet panel -->
         <div id="walletPanel" class="mt-6 hidden">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="rounded-xl bg-neutral-950/80 border border-white/10 p-4">
-              <div class="text-xs text-neutral-400">Address</div>
-              <div id="addr" class="font-mono text-sm truncate mt-1">—</div>
+            <div class="text-xs text-neutral-400">Address</div>
+            <div id="addr" class="font-mono text-sm truncate mt-1">—</div>
             </div>
             <div class="rounded-xl bg-neutral-950/80 border border-white/10 p-4">
-              <div class="text-xs text-neutral-400">Native Balance</div>
-              <div class="flex items-baseline gap-2 mt-1">
+            <div class="text-xs text-neutral-400">Native Balance</div>
+            <div class="flex items-baseline gap-2 mt-1">
                 <span id="bal" class="text-lg font-semibold">0.0000</span>
                 <span id="sym" class="text-sm text-neutral-400">ETH</span>
-              </div>
+            </div>
             </div>
             <div class="rounded-xl bg-neutral-950/80 border border-white/10 p-4">
-              <div class="text-xs text-neutral-400">Est. Value (USD)</div>
-              <div id="usd" class="text-lg font-semibold mt-1">$0.00</div>
+            <div class="text-xs text-neutral-400">Est. Value (USD)</div>
+            <div id="usd" class="text-lg font-semibold mt-1">$0.00</div>
             </div>
-          </div>
         </div>
-      </div>
+        </div>
     </div>
-  </section>
+    </div>
+</section>
 
-  <!-- Running Ticker -->
-  <div class="border-y border-white/5 bg-neutral-900/40">
+<!-- Running Ticker -->
+<div class="border-y border-white/5 bg-neutral-900/40">
     <div id="ticker" class="max-w-7xl mx-auto px-4 overflow-hidden py-2 relative">
-      <div id="tickerInner" class="whitespace-nowrap will-change-transform"></div>
+    <div id="tickerInner" class="whitespace-nowrap will-change-transform"></div>
     </div>
-  </div>
+</div>
 
-  <!-- Main Content -->
-  <main class="max-w-7xl mx-auto px-4 py-8">
+<!-- Top coins grid -->
+<main class="max-w-7xl mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-bold">Top 10 Coins</h2>
-      <div id="lastUpdated" class="text-xs text-neutral-400">—</div>
+    <h2 class="text-xl font-bold">Top 10 Coins</h2>
+    <div id="lastUpdated" class="text-xs text-neutral-400">—</div>
     </div>
-    <div id="grid"></div>
-  </main>
 
-  <!-- Modal -->
-  <div id="modal" class="fixed inset-0 z-40 hidden">
+    <div id="grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+</main>
+
+<!-- Modal -->
+<div id="modal" class="fixed inset-0 z-40 hidden">
     <div class="absolute inset-0 bg-black/60" onclick="closeModal()"></div>
     <div class="relative max-w-2xl mx-auto mt-16 rounded-2xl bg-neutral-900 border border-white/10 overflow-hidden">
-      <div class="flex items-center justify-between px-5 py-3 border-b border-white/10">
+    <div class="flex items-center justify-between px-5 py-3 border-b border-white/10">
         <div class="font-semibold" id="modalTitle">Coin</div>
         <button class="text-neutral-300 hover:text-white" onclick="closeModal()">✕</button>
-      </div>
-      <div class="p-5 space-y-4">
+    </div>
+    <div class="p-5 space-y-4">
         <div class="grid grid-cols-2 gap-4">
-          <div>
+        <div>
             <div class="text-sm text-neutral-400">Price</div>
             <div id="m_price" class="text-lg font-semibold">$—</div>
-          </div>
-          <div>
-            <div class="text-sm text-neutral-400">24h Change</div>
-            <div id="m_change" class="text-lg font-semibold">—</div>
-          </div>
-          <div>
-            <div class="text-sm text-neutral-400">Market Cap</div>
-            <div id="m_mc" class="font-medium">$—</div>
-          </div>
-          <div>
-            <div class="text-sm text-neutral-400">24h Volume</div>
-            <div id="m_vol" class="font-medium">$—</div>
-          </div>
         </div>
         <div>
-          <canvas id="m_chart" height="120"></canvas>
+            <div class="text-sm text-neutral-400">24h Change</div>
+            <div id="m_change" class="text-lg font-semibold">—</div>
         </div>
-      </div>
+        <div>
+            <div class="text-sm text-neutral-400">Market Cap</div>
+            <div id="m_mc" class="font-medium">$—</div>
+        </div>
+        <div>
+            <div class="text-sm text-neutral-400">24h Volume</div>
+            <div id="m_vol" class="font-medium">$—</div>
+        </div>
+        </div>
+        <div>
+        <canvas id="m_chart" height="120"></canvas>
+        </div>
     </div>
-  </div>
+    </div>
+</div>
 
-  <!-- App Scripts -->
-  <script type="text/babel" src="App.jsx"></script>
-  <script type="text/babel" src="components/Sparkline.jsx"></script>
-  <script type="text/babel" src="components/CoinCard.jsx"></script>
-  <script type="text/babel" src="utils/api.js"></script>
-  <script type="text/babel" src="utils/helpers.js"></script>
-  <script type="text/babel">
-    const root = ReactDOM.createRoot(document.getElementById('grid').parentElement);
-    root.render(<App />);
-  </script>
+<!-- App script -->
+<script type="text/babel">
+    const { useEffect, useRef, useState } = React;
+
+    // Coingecko helpers
+    const api = {
+    async topCoins() {
+        const url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=true&price_change_percentage=24h";
+        const r = await fetch(url);
+        return r.json();
+    },
+    async coinDetail(id) {
+        const url = `https://api.coingecko.com/api/v3/coins/${id}?localization=false&market_data=true`;
+        const r = await fetch(url);
+        return r.json();
+    },
+    async coinChart7d(id) {
+        const url = `https://api.coingecko.com/api/v3/coins/${id}/market_chart?vs_currency=usd&days=7`;
+        const r = await fetch(url);
+        return r.json();
+    },
+    async simplePrice(id) {
+        const r = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${id}&vs_currencies=usd`);
+        return r.json();
+    }
+    };
+
+    // chain mapping for native symbol & coingecko id
+    const CHAINS = {
+    ethereum: { cgId: "ethereum", symbol: "ETH", chainIdHex: "0x1" },
+    bsc: { cgId: "binancecoin", symbol: "BNB", chainIdHex: "0x38" },
+    polygon: { cgId: "matic-network", symbol: "MATIC", chainIdHex: "0x89" },
+    };
+
+    // util
+    const fmtUSD = (n) => n?.toLocaleString(undefined, { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
+    const cls = (...a) => a.filter(Boolean).join(' ');
+
+    function useTheme() {
+    const [dark, setDark] = useState(true);
+    useEffect(() => {
+        const root = document.documentElement;
+        dark ? root.classList.add('dark') : root.classList.remove('dark');
+    }, [dark]);
+    return [dark, setDark];
+    }
+
+    function Sparkline({ data, color }) {
+    const ref = useRef(null);
+    useEffect(() => {
+        if (!ref.current) return;
+        const ctx = ref.current.getContext('2d');
+        const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map((_, i) => i),
+            datasets: [{
+            data,
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: 0.3
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+            elements: { line: { borderColor: color || '#22c55e' } },
+            scales: { x: { display: false }, y: { display: false } },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+        });
+        return () => chart.destroy();
+    }, [data, color]);
+    return <div className="h-12"><canvas ref={ref}></canvas></div>;
+    }
+
+    function CoinCard({ coin, onClick }) {
+    const isUp = coin.price_change_percentage_24h >= 0;
+    const color = isUp ? '#22c55e' : '#ef4444';
+    return (
+        <button onClick={onClick} className="text-left rounded-2xl bg-neutral-900/50 hover:bg-neutral-900 border border-white/10 p-4 transition shadow-soft">
+        <div className="flex items-center gap-3">
+            <img src={coin.image} alt={coin.symbol} className="h-7 w-7 rounded-full"/>
+            <div className="font-semibold">{coin.name} <span className="text-xs text-neutral-400">({coin.symbol.toUpperCase()})</span></div>
+            <div className="ml-auto font-semibold">{fmtUSD(coin.current_price)}</div>
+        </div>
+        <div className="flex items-center gap-3 mt-2">
+            <div className={cls("text-sm font-medium", isUp ? "text-green-400" : "text-red-400")}>
+            {isUp ? "▲" : "▼"} {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
+            </div>
+            <div className="ml-auto w-32">
+            <Sparkline data={(coin.sparkline_in_7d?.price || []).slice(-40)} color={color}/>
+            </div>
+        </div>
+        </button>
+    );
+    }
+
+    function App() {
+    const [dark, setDark] = useTheme();
+    const [coins, setCoins] = useState([]);
+    const [lastUpd, setLastUpd] = useState('');
+    const [modal, setModal] = useState(null); // {id, data}
+    const [wallet, setWallet] = useState({ address: null, balance: 0, usd: 0 });
+    const [chainKey, setChainKey] = useState('ethereum');
+
+    // Ticker
+    useEffect(() => {
+        let stop = false;
+        (async () => {
+        const data = await api.topCoins();
+        if (stop) return;
+        setCoins(data);
+        setLastUpd(new Date().toLocaleTimeString());
+        buildTicker(data);
+        })();
+        const iv = setInterval(async () => {
+        const data = await api.topCoins();
+        if (stop) return;
+        setCoins(data);
+        setLastUpd(new Date().toLocaleTimeString());
+        buildTicker(data);
+        }, 60_000);
+        return () => { stop = true; clearInterval(iv); };
+    }, []);
+
+    // Theme toggle
+    useEffect(() => {
+        document.getElementById('themeToggle').onclick = () => setDark(d => !d);
+    }, []);
+
+    // Chain selector handler
+    useEffect(() => {
+        const el = document.getElementById('chainSelect');
+        el.onchange = async (e) => {
+        const [key, cg, sym] = e.target.value.split('|');
+        setChainKey(key);
+        document.getElementById('sym').textContent = sym;
+        if (wallet.address) await refreshBalance(key);
+        };
+    }, [wallet.address]);
+
+    // Connect / disconnect
+    useEffect(() => {
+        const btn = document.getElementById('connectBtn');
+        btn.onclick = async () => {
+        if (wallet.address) {
+            // disconnect
+            setWallet({ address: null, balance: 0, usd: 0 });
+            document.getElementById('walletPanel').classList.add('hidden');
+            btn.querySelector('span').textContent = 'Connect Wallet';
+            return;
+        }
+        const injected = window.ethereum || window.okxwallet;
+        if (!injected) {
+            alert('Please install MetaMask or OKX Wallet.');
+            return;
+        }
+        try {
+            const provider = new ethers.BrowserProvider(injected);
+            const signer = await provider.getSigner();
+            const addr = await signer.getAddress();
+            // try request accounts to trigger connect UI if needed
+            if (injected.request) await injected.request({ method: 'eth_requestAccounts' });
+
+            document.getElementById('walletPanel').classList.remove('hidden');
+            document.getElementById('addr').textContent = addr;
+            btn.querySelector('span').textContent = 'Disconnect';
+            setWallet(w => ({ ...w, address: addr }));
+            await refreshBalance(chainKey);
+        } catch (e) {
+            console.error(e);
+            alert('Failed to connect wallet.');
+        }
+        };
+    }, [chainKey, wallet.address]);
+
+    async function refreshBalance(key) {
+        try {
+        const injected = window.ethereum || window.okxwallet;
+        const provider = new ethers.BrowserProvider(injected);
+        const addr = (await provider.getSigner()).address;
+        const wei = await provider.getBalance(addr);
+        const eth = parseFloat(ethers.formatEther(wei));
+        document.getElementById('bal').textContent = eth.toFixed(4);
+
+        const cgId = CHAINS[key].cgId;
+        const price = (await api.simplePrice(cgId))[cgId].usd;
+        const usd = eth * price;
+        document.getElementById('usd').textContent = fmtUSD(usd);
+        setWallet({ address: addr, balance: eth, usd });
+        } catch (e) {
+        console.error('Balance error', e);
+        }
+    }
+
+    // Modal
+    async function openModal(coin) {
+        document.getElementById('modal').classList.remove('hidden');
+        document.getElementById('modalTitle').textContent = `${coin.name} (${coin.symbol.toUpperCase()})`;
+        const detail = await api.coinDetail(coin.id);
+        const chart = await api.coinChart7d(coin.id);
+
+        const price = detail.market_data.current_price.usd;
+        const chg = detail.market_data.price_change_percentage_24h;
+        const mc = detail.market_data.market_cap.usd;
+        const vol = detail.market_data.total_volume.usd;
+
+        const isUp = chg >= 0;
+        document.getElementById('m_price').textContent = fmtUSD(price);
+        document.getElementById('m_change').textContent = `${isUp ? '▲' : '▼'} ${Math.abs(chg).toFixed(2)}%`;
+        document.getElementById('m_change').className = cls('text-lg font-semibold', isUp ? 'text-green-400' : 'text-red-400');
+        document.getElementById('m_mc').textContent = fmtUSD(mc);
+        document.getElementById('m_vol').textContent = fmtUSD(vol);
+
+        // big chart
+        const ctx = document.getElementById('m_chart').getContext('2d');
+        if (window.__modalChart) window.__modalChart.destroy();
+        window.__modalChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chart.prices.map(p => new Date(p[0]).toLocaleDateString()),
+            datasets: [{
+            data: chart.prices.map(p => p[1]),
+            borderWidth: 2,
+            pointRadius: 0,
+            tension: .25
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+            x: { ticks: { display: false }, grid: { display: false } },
+            y: { ticks: { color: '#aaa' }, grid: { color: 'rgba(255,255,255,.05)' } }
+            }
+        }
+        });
+    }
+    window.closeModal = () => {
+        document.getElementById('modal').classList.add('hidden');
+    };
+
+    // build ticker marquee
+    function buildTicker(data) {
+        const inner = document.getElementById('tickerInner');
+        inner.innerHTML = '';
+        const row = document.createElement('div');
+        row.className = 'inline-flex gap-6 items-center';
+        data.forEach(c => {
+        const up = c.price_change_percentage_24h >= 0;
+        const el = document.createElement('button');
+        el.className = 'inline-flex items-center gap-2 hover:underline';
+        el.innerHTML = `
+            <img src="${c.image}" class="h-4 w-4 rounded-full"/>
+            <span class="text-xs">${c.symbol.toUpperCase()}</span>
+            <span class="text-xs font-semibold">${fmtUSD(c.current_price)}</span>
+            <span class="text-[11px] ${up ? 'text-green-400' : 'text-red-400'}">${up ? '▲' : '▼'} ${Math.abs(c.price_change_percentage_24h).toFixed(2)}%</span>`;
+        el.onclick = () => openModal(c);
+        row.appendChild(el);
+        });
+        // duplicate for smooth loop
+        const row2 = row.cloneNode(true);
+        inner.appendChild(row); inner.appendChild(row2);
+
+        // animate
+        let x = 0;
+        function step() {
+        x -= 0.5; // speed
+        if (Math.abs(x) >= row.getBoundingClientRect().width) x = 0;
+        inner.style.transform = `translateX(${x}px)`;
+        requestAnimationFrame(step);
+        }
+        requestAnimationFrame(step);
+    }
+
+    return (
+        <div>
+        <div id="grid" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {coins.map(c => (
+            <CoinCard key={c.id} coin={c} onClick={() => openModal(c)} />
+            ))}
+        </div>
+        </div>
+    );
+    }
+
+    ReactDOM.createRoot(document.getElementById('grid').parentElement).render(<App />);
+</script>
 </body>
 </html>
