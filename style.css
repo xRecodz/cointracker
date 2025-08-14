@@ -1,32 +1,65 @@
 body {
     font-family: Arial, sans-serif;
-    padding: 20px;
+    margin: 0;
     background-color: #0d1117;
     color: white;
 }
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #161b22;
+    padding: 15px 20px;
+}
+
 h1 {
-    text-align: center;
+    margin: 0;
+    font-size: 1.5rem;
 }
-button {
+
+#connectBtn {
     padding: 10px 20px;
-    background-color: #ff9800;
-    color: white;
+    background-color: #f4c542; /* kuning */
+    color: black;
     border: none;
+    border-radius: 8px;
+    font-weight: bold;
     cursor: pointer;
-    margin-bottom: 20px;
+    transition: background-color 0.3s;
 }
-button:hover {
-    background-color: #e68900;
+
+#connectBtn:hover {
+    background-color: #ddb434;
 }
-#portfolio, #topCoins {
-    margin-top: 20px;
+
+.wallet-info {
+    background-color: #161b22;
+    margin: 15px;
+    padding: 15px;
+    border-radius: 8px;
 }
+
+#walletInfo p {
+    margin: 5px 0;
+}
+
+#topCoins {
+    margin: 20px;
+}
+
 .coin-item {
     padding: 10px;
     border-bottom: 1px solid #333;
     display: flex;
     justify-content: space-between;
+    cursor: pointer;
+    transition: background-color 0.2s;
 }
+.coin-item:hover {
+    background-color: #1f2937;
+}
+
 .marquee-coin {
     margin-right: 20px;
     cursor: pointer;
