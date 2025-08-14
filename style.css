@@ -1,94 +1,104 @@
+/* ===== Hero Background ===== */
 .hero-bg {
-    background: radial-gradient(1200px 600px at 10% -10%, rgba(244,197,66,0.2), transparent 60%),
-                radial-gradient(1200px 600px at 110% 10%, rgba(66,153,244,0.15), transparent 60%),
-                linear-gradient(180deg, rgba(255,255,255,0.02), transparent 60%);
-    animation: float 12s ease-in-out infinite alternate;
-  }
-  @keyframes float {
-    from { background-position: 0 0, 0 0, 0 0; }
-    to { background-position: 20px -20px, -30px 30px, 0 0; }
-  }
-  
-  ::-webkit-scrollbar { height: 8px; width: 8px; }
-  ::-webkit-scrollbar-thumb { background: #3b3f45; border-radius: 8px; }
-  
-  .shadow-soft { box-shadow: 0 6px 24px rgba(0,0,0,.15); }
-  
-  #menuBtn {
-    font-size: 16px;
-    font-weight: bold;
-    background-color: #F4C542;
-    color: #111;
-  }
-  #menuBtn:hover { background-color: #DDB434; }
-  
-  /* Sidebar */
-  #sidebar {
-    transition: transform 0.3s ease;
-  }
-  #sidebar.collapsed {
-    transform: translateX(-100%);
-  }
-  
-  /* Konten utama bergeser hanya padding, tetap center */
-  #mainContent {
-    transition: padding-left 0.3s ease;
-  }
-  #mainContent.sidebar-open {
-    padding-left: 16rem;
-  }
-  #mainContent.sidebar-closed {
-    padding-left: 0;
-  }
-  
-  #sidebar nav a {
-    display: block;
-    padding: 4px 0;
-    color: #fff;
-    transition: color 0.2s ease;
-  }
-  #sidebar nav a:hover {
-    color: #F4C542;
-  }
-  
-  #tickerInner {
-    display: inline-flex;
-    gap: 2rem;
-    white-space: nowrap;
-    will-change: transform;
-  }
-  #tickerContainer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(17,17,17,0.9);
-    border-top: 1px solid rgba(255,255,255,0.05);
-  }
-  
-  #chainMenu {
-    animation: fadeIn 0.15s ease;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.97); }
-    to { opacity: 1; transform: scale(1); }
-  }
-  
-  #walletStatus { line-height: 1; }
-  #walletAddr {
-    max-width: 110px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  
-  #coinModal {
-    animation: fadeIn 0.25s ease;
-  }
+  background: linear-gradient(
+      90deg,
+      rgba(244, 197, 66, 0.07) 0%,
+      rgba(32, 32, 32, 0.05) 100%
+  ),
+  radial-gradient(
+      circle at top left,
+      rgba(244, 197, 66, 0.05) 15%,
+      transparent 80%
+  );
+}
 
-  #walletBtn img {
-    border: 2px solid #F4C542;
+/* ===== Soft Shadow ===== */
+.shadow-soft {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* ===== Scrollbar Styling ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ===== Wallet Profile Styling ===== */
+#walletProfile {
+  display: flex;
+  align-items: center;
+}
+
+#walletBtn {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+#walletIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+#walletBalanceText {
+  font-size: 0.85rem;
+  color: #f4c542; /* warna brand */
+}
+
+/* ===== Sidebar Menu Styling ===== */
+#sidebar nav a {
+  transition: all 0.2s ease;
+}
+
+#sidebar nav a:hover {
+  color: #F4C542;
+}
+
+#sidebar nav div.uppercase {
+  letter-spacing: 0.05em;
+}
+
+/* ===== Active Link (optional, bisa aktifkan via JS) ===== */
+.sidebar-active {
+  color: #F4C542 !important;
+  font-weight: 600;
+}
+
+/* ===== Ticker Bar ===== */
+#tickerContainer {
+  background-color: rgba(20,20,20,0.8);
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+#tickerInner {
+  animation: tickerSlide linear infinite;
+}
+
+@keyframes tickerSlide {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ===== Transition Untuk Sidebar ===== */
+#sidebar {
+  will-change: transform;
+}
+
+/* ===== Responsive Fixes ===== */
+@media (max-width: 768px) {
+  #walletBalanceText {
+    display: none; /* balance disembunyikan di layar kecil untuk hemat ruang */
   }
-  #walletDropdown {
-    animation: fadeIn 0.15s ease;
+  #sidebar {
+    background-color: #171717;
   }
+}
