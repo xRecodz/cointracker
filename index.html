@@ -1,36 +1,175 @@
-<!-- ✅ index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crypto Price Tracker</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
-</head>
-<body>
-  <!-- Running Ticker -->
-  <div id="ticker"></div>
+  <title>Crypto Portfolio Tracker</title>
 
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { inter: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: {
+            brand: {
+              DEFAULT: '#8B5CF6', // Vibrant purple
+              dark: '#7C3AED',   // Darker purple for hover
+              light: '#A78BFA',  // Lighter purple for accents
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React (CDN) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Ethers v6 (UMD) -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.0/dist/ethers.umd.min.js"></script>
+
+  <!-- Chart.js (sparkline & modal chart) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* Hero gradient animation with purple tones */
+    .hero-bg {
+      background: radial-gradient(1200px 600px at 10% -10%, rgba(139, 92, 246, 0.2), transparent 60%),
+                  radial-gradient(1200px 600px at 110% 10%, rgba(124, 58, 237, 0.15), transparent 60%),
+                  linear-gradient(180deg, rgba(255,255,255,0.02), transparent 60%);
+      animation: float 12s ease-in-out infinite alternate;
+    }
+    @keyframes float {
+      from { background-position: 0 0, 0 0, 0 0; }
+      to   { background-position: 20px -20px, -30px 30px, 0 0; }
+    }
+    /* Subtle scrollbar */
+    ::-webkit-scrollbar { height: 8px; width: 8px; }
+    ::-webkit-scrollbar-thumb { background: #3b3f45; border-radius: 8px; }
+    .shadow-soft { box-shadow: 0 6px 24px rgba(0,0,0,.15); }
+  </style>
+</head>
+<body class="bg-neutral-950 text-neutral-100 font-inter selection:bg-brand/30 selection:text-neutral-900">
   <!-- Header -->
-  <header>
-    <h1>Crypto Price Tracker</h1>
-    <button id="connectWalletBtn">Connect Wallet</button>
+  <header class="sticky top-0 z-30 backdrop-blur bg-neutral-950/70 border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="h-8 w-8 rounded-xl bg-brand/90 ring-2 ring-brand/40 grid place-items-center text-neutral-900 font-extrabold">Ξ</div>
+        <span class="font-semibold tracking-tight">Crypto Portfolio Tracker</span>
+      </div>
+      <div class="ml-auto flex items-center gap-2">
+        <select id="chainSelect" class="bg-neutral-900 border border-white/10 rounded-xl px-3 py-2 text-sm">
+          <option value="ethereum|ethereum|ETH">Ethereum</option>
+          <option value="bsc|binancecoin|BNB">BSC</option>
+          <option value="polygon|matic-network|MATIC">Polygon</option>
+        </select>
+        <button id="themeToggle" class="rounded-xl px-3 py-2 text-sm bg-neutral-900 border border-white/10 hover:bg-neutral-800 transition">
+          ☀️ / 🌙
+        </button>
+        <button id="connectBtn" class="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold bg-brand text-neutral-900 hover:bg-brand-dark transition shadow-soft">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 7h-7a5 5 0 0 0-5 5v0a5 5 0 0 0 5 5h7v2h-7a7 7 0 0 1 0-14h7v2z"/><circle cx="17" cy="12" r="1.5" fill="#111"/></svg>
+          <span>Connect Wallet</span>
+        </button>
+      </div>
+    </div>
   </header>
 
-  <!-- Wallet Info -->
-  <div id="walletInfo" class="hidden">
-    <p><strong>Address:</strong> <span id="walletAddress"></span></p>
-    <p><strong>Balance:</strong> <span id="walletBalance"></span> ETH</p>
+  <!-- Hero Section -->
+  <section class="hero-bg">
+    <div class="max-w-7xl mx-auto px-4 py-10 md:py-14">
+      <div class="rounded-2xl border border-white/10 bg-neutral-900/40 p-6 md:p-8">
+        <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Track your portfolio in real-time.</h1>
+        <p class="text-neutral-300 mt-2">Live prices, beautiful charts, and Web3 wallet integration — ready for your portfolio.</p>
+        <div id="walletPanel" class="mt-6 hidden">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="rounded-xl bg-neutral-950/80 border border-white/10 p-4">
+              <div class="text-xs text-neutral-400">Address</div>
+              <div id="addr" class="font-mono text-sm truncate mt-1">—</div>
+            </div>
+            <div class="rounded-xl bg-neutral-950/80 border border-white/10 p-4">
+              <div class="text-xs text-neutral-400">Native Balance</div>
+              <div class="flex items-baseline gap-2 mt-1">
+                <span id="bal" class="text-lg font-semibold">0.0000</span>
+                <span id="sym" class="text-sm text-neutral-400">ETH</span>
+              </div>
+            </div>
+            <div class="rounded-xl bg-neutral-950/80 border border-white/10 p-4">
+              <div class="text-xs text-neutral-400">Est. Value (USD)</div>
+              <div id="usd" class="text-lg font-semibold mt-1">$0.00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Running Ticker -->
+  <div class="border-y border-white/5 bg-neutral-900/40">
+    <div id="ticker" class="max-w-7xl mx-auto px-4 overflow-hidden py-2 relative">
+      <div id="tickerInner" class="whitespace-nowrap will-change-transform"></div>
+    </div>
   </div>
 
-  <!-- Top 10 Coins -->
-  <section id="coinsGrid"></section>
+  <!-- Main Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold">Top 10 Coins</h2>
+      <div id="lastUpdated" class="text-xs text-neutral-400">—</div>
+    </div>
+    <div id="grid"></div>
+  </main>
 
-  <!-- Modal Detail Coin -->
-  <div id="coinModal" class="hidden"></div>
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 z-40 hidden">
+    <div class="absolute inset-0 bg-black/60" onclick="closeModal()"></div>
+    <div class="relative max-w-2xl mx-auto mt-16 rounded-2xl bg-neutral-900 border border-white/10 overflow-hidden">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-white/10">
+        <div class="font-semibold" id="modalTitle">Coin</div>
+        <button class="text-neutral-300 hover:text-white" onclick="closeModal()">✕</button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <div class="text-sm text-neutral-400">Price</div>
+            <div id="m_price" class="text-lg font-semibold">$—</div>
+          </div>
+          <div>
+            <div class="text-sm text-neutral-400">24h Change</div>
+            <div id="m_change" class="text-lg font-semibold">—</div>
+          </div>
+          <div>
+            <div class="text-sm text-neutral-400">Market Cap</div>
+            <div id="m_mc" class="font-medium">$—</div>
+          </div>
+          <div>
+            <div class="text-sm text-neutral-400">24h Volume</div>
+            <div id="m_vol" class="font-medium">$—</div>
+          </div>
+        </div>
+        <div>
+          <canvas id="m_chart" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
-  <script src="script.js"></script>
+  <!-- App Scripts -->
+  <script type="text/babel" src="App.jsx"></script>
+  <script type="text/babel" src="components/Sparkline.jsx"></script>
+  <script type="text/babel" src="components/CoinCard.jsx"></script>
+  <script type="text/babel" src="utils/api.js"></script>
+  <script type="text/babel" src="utils/helpers.js"></script>
+  <script type="text/babel">
+    const root = ReactDOM.createRoot(document.getElementById('grid').parentElement);
+    root.render(<App />);
+  </script>
 </body>
 </html>
