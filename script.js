@@ -1,75 +1,58 @@
-const connectBtn = document.getElementById("connectBtn");
-const walletInfoDiv = document.getElementById("walletInfo");
-const walletAddressEl = document.getElementById("walletAddress");
-const walletBalanceEl = document.getElementById("walletBalance");
-const topCoinsDiv = document.getElementById("topCoins");
-const coinMarquee = document.getElementById("coinMarquee");
+// ✅ script.js
+const connectWalletBtn = document.getElementById("connectWalletBtn");
+const walletInfo = document.getElementById("walletInfo");
+const walletAddress = document.getElementById("walletAddress");
+const walletBalance = document.getElementById("walletBalance");
+const coinsGrid = document.getElementById("coinsGrid");
+const ticker = document.getElementById("ticker");
 
-let provider, signer, userAddress;
+let provider;
 
-// Connect / Disconnect wallet
-connectBtn.onclick = async () => {
-    if (userAddress) {
-        // Disconnect
-        userAddress = null;
-        walletInfoDiv.style.display = "none";
-        connectBtn.textContent = "Connect Wallet";
-        return;
-    }
+connectWalletBtn.addEventListener("click", async () => {
+  if (connectWalletBtn.innerText === "Disconnect") {
+    connectWalletBtn.innerText = "Connect Wallet";
+    walletInfo.classList.add("hidden");
+    return;
+  }
 
-    const walletProvider = window.ethereum || window.okxwallet;
-    if (!walletProvider) {
-        alert("Please install MetaMask or OKX Wallet!");
-        return;
-    }
+  if (typeof window.ethereum !== "undefined") {
     try {
-        provider = new ethers.BrowserProvider(walletProvider);
-        signer = await provider.getSigner();
-        userAddress = await signer.getAddress();
-        connectBtn.textContent = "Disconnect";
-        walletInfoDiv.style.display = "block";
-        loadPortfolio();
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+      const address = accounts[0];
+      walletAddress.innerText = address;
+
+      const balance = await provider.getBalance(address);
+      walletBalance.innerText = ethers.utils.formatEther(balance);
+
+      connectWalletBtn.innerText = "Disconnect";
+      walletInfo.classList.remove("hidden");
     } catch (err) {
-        console.error("Error connecting:", err);
+      console.error("Wallet connection failed:", err);
     }
-};
+  } else {
+    alert("Please install MetaMask or compatible wallet!");
+  }
+});
 
-// Load portfolio
-async function loadPortfolio(coinId = "ethereum") {
-    const balanceWei = await provider.getBalance(userAddress);
-    const balance = parseFloat(ethers.formatEther(balanceWei));
+async function getTopCoins() {
+  const res = await fetch("https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=true");
+  const data = await res.json();
 
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`);
-    const prices = await res.json();
-    const price = prices[coinId].usd;
+  // Render ticker
+  ticker.innerHTML = data.map(coin => `${coin.name}: $${coin.current_price}`).join(" | ");
 
-    walletAddressEl.textContent = userAddress;
-    walletBalanceEl.textContent = `${balance.toFixed(4)} ${coinId.toUpperCase()} ($${(balance * price).toFixed(2)})`;
+  // Render grid
+  coinsGrid.innerHTML = data.map(coin => `
+    <div class="coin-card">
+      <img src="${coin.image}" alt="${coin.name}" width="32" />
+      <h3>${coin.name}</h3>
+      <p>$${coin.current_price}</p>
+      <p style="color:${coin.price_change_percentage_24h >= 0 ? 'lime' : 'red'}">
+        ${coin.price_change_percentage_24h.toFixed(2)}%
+      </p>
+    </div>
+  `).join("");
 }
 
-// Load top 10 coins
-async function loadTopCoins() {
-    const res = await fetch(
-        "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1"
-    );
-    const data = await res.json();
-
-    // Marquee
-    coinMarquee.innerHTML = data
-        .map(coin => `<span class="marquee-coin" onclick="loadPortfolio('${coin.id}')">${coin.symbol.toUpperCase()}: $${coin.current_price}</span>`)
-        .join(" ");
-
-    // List
-    topCoinsDiv.innerHTML = "<h2 style='margin-left:15px;'>Top 10 Coins</h2>" + data
-        .map(coin => `
-            <div class="coin-item" onclick="loadPortfolio('${coin.id}')">
-                <span>${coin.market_cap_rank}. ${coin.name} (${coin.symbol.toUpperCase()})</span>
-                <span>$${coin.current_price}</span>
-            </div>
-        `)
-        .join("");
-}
-
-// Load coin data on start
-loadTopCoins();
-setInterval(loadTopCoins, 60000);
+getTopCoins();
