@@ -315,4 +315,52 @@ function buildTicker(data) {
   requestAnimationFrame(step);
 }
 
+async function connectWalletInit() {
+  const connectBtn = document.getElementById('connectBtn');
+  const walletProfile = document.getElementById('walletProfile');
+  const balanceText = document.getElementById('walletBalanceText');
+
+  connectBtn.addEventListener('click', async () => {
+    if (typeof window.ethereum === 'undefined') {
+      alert('MetaMask not found!');
+      return;
+    }
+
+    try {
+      // Connect wallet
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = await provider.getSigner();
+      const addr = await signer.getAddress();
+
+      // Ambil saldo ETH/BNB/MATIC
+      const balanceWei = await provider.getBalance(addr);
+      const balanceEth = parseFloat(ethers.formatEther(balanceWei));
+
+      // Ambil harga coin dari CoinGecko
+      const chainName = document.getElementById("chainName").textContent.trim().toLowerCase();
+      let coinId = "ethereum";
+      if (chainName === "bsc") coinId = "binancecoin";
+      if (chainName === "polygon") coinId = "matic-network";
+
+      const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd`);
+      const priceData = await res.json();
+      const usdPrice = priceData[coinId].usd;
+
+      // Hitung total value dalam USD
+      const totalUSD = (balanceEth * usdPrice).toFixed(2);
+
+      // Update UI
+      balanceText.textContent = `${balanceEth.toFixed(4)} ${chainName.toUpperCase()} ($${totalUSD})`;
+
+      // Tampilkan wallet profile, sembunyikan tombol connect
+      walletProfile.classList.remove('hidden');
+      connectBtn.classList.add('hidden');
+
+    } catch (err) {
+      console.error(err);
+    }
+  });
+}
+
 ReactDOM.createRoot(document.getElementById("app-root")).render(<App />);
