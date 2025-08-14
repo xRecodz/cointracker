@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top 25 RWA Coins - Long Term Potential</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-neutral-950 text-neutral-100 font-inter">
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">💎 Top 25 RWA Coins — Long Term Potential</h1>
+      <a href="index.html" class="text-brand hover:underline">← Back to Dashboard</a>
+    </div>
+
+    <!-- Grid Coins -->
+    <div id="coinsGrid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+  </div>
+
+<script>
+const rwaCoins = [
+  { id: "chainlink", reason: "Jaringan oracle terkemuka yang menghubungkan blockchain dengan data dunia nyata." },
+  { id: "maker", reason: "Pionir stablecoin DAI dan DeFi, integrasi luas di ekosistem Ethereum." },
+  { id: "ondo-finance", reason: "Platform tokenisasi aset dunia nyata seperti obligasi dan real estate." },
+  { id: "centrifuge", reason: "Menghubungkan aset dunia nyata ke DeFi untuk pembiayaan yang lebih cepat." },
+  { id: "tokenfi", reason: "Ekosistem tokenisasi aset dengan target adopsi retail dan institusi." },
+  { id: "goldfinch", reason: "Lending platform berbasis blockchain untuk pinjaman tanpa jaminan." },
+  { id: "maple", reason: "Platform pinjaman korporasi terdesentralisasi untuk pembiayaan bisnis." },
+  { id: "pendle", reason: "Protokol trading yield yang makin relevan di pasar token RWA." },
+  { id: "swarm-markets", reason: "Platform DEX berlisensi untuk tokenisasi dan perdagangan aset real." },
+  { id: "dusk-network", reason: "Blockchain fokus privasi untuk sekuritas dan aset digital regulasi." },
+  { id: "polymath", reason: "Menyediakan infrastruktur untuk penerbitan sekuritas token." },
+  { id: "harbor", reason: "Proyek untuk tokenisasi real estate dan sekuritas aset nyata." },
+  { id: "realio-network", reason: "Platform investasi real estate berbasis blockchain." },
+  { id: "estatex", reason: "Fokus pada tokenisasi properti agar mudah diakses investor global." },
+  { id: "props-token", reason: "Ekosistem reward berbasis blockchain untuk kreator dan bisnis." },
+  { id: "metaverse-capital", reason: "Berinvestasi di aset tokenisasi dunia nyata dan metaverse." },
+  { id: "stobox-token", reason: "Platform STO (Security Token Offerings) untuk aset nyata." },
+  { id: "veil-ecosystem", reason: "Project tokenisasi aset dengan fitur privat." },
+  { id: "defactor", reason: "Fokus pada pembiayaan dan tokenisasi aset fisik untuk DeFi." },
+  { id: "bricks-token", reason: "Tokenisasi properti komersial dan residensial." },
+  { id: "digishares", reason: "Platform penerbitan dan manajemen sekuritas token." },
+  { id: "ekta", reason: "Blockchain yang menghubungkan ekonomi digital dengan aset dunia nyata." },
+  { id: "openport", reason: "Supply chain dan pembiayaan transportasi yang ditokenisasi." },
+  { id: "silta-finance", reason: "Tokenisasi proyek infrastruktur berkelanjutan." },
+  { id: "citaDAO", reason: "DeFi untuk investasi properti yang terdesentralisasi." }
+];
+
+async function loadRWACoins() {
+  const ids = rwaCoins.map(c => c.id).join(",");
+  const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&sparkline=false&price_change_percentage=24h`);
+  const coins = await res.json();
+  renderCoins(coins);
+}
+
+function fmtUSD(n) {
+  return n?.toLocaleString(undefined, { style: "currency", currency: "USD" });
+}
+
+function renderCoins(coins) {
+  const grid = document.getElementById("coinsGrid");
+  grid.innerHTML = "";
+
+  coins.forEach(c => {
+    const reasonText = rwaCoins.find(rc => rc.id === c.id)?.reason || "";
+    const card = document.createElement("div");
+    card.className = "rounded-2xl bg-neutral-900/50 border border-white/10 p-4 transition hover:bg-neutral-800/50";
+
+    card.innerHTML = `
+      <div class="flex items-center gap-3">
+        <img src="${c.image}" alt="${c.symbol}" class="h-8 w-8 rounded-full" />
+        <div>
+          <div class="font-semibold">${c.name}</div>
+          <div class="text-xs uppercase text-neutral-400">${c.symbol}</div>
+        </div>
+        <div class="ml-auto text-right">
+          <div class="font-semibold">${fmtUSD(c.current_price)}</div>
+          <div class="text-sm ${c.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'}">
+            ${c.price_change_percentage_24h?.toFixed(2)}%
+          </div>
+        </div>
+      </div>
+      <p class="mt-3 text-xs text-neutral-400 border-t border-white/5 pt-2 leading-relaxed">
+        ${reasonText}
+      </p>
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", loadRWACoins);
+</script>
+
+</body>
+</html>

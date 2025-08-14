@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Top Market Cap</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-neutral-950 text-neutral-100 font-inter">
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">⭐ Top Market Cap (Top 100 Coins)</h1>
+      <a href="index.html" class="text-brand hover:underline">← Back to Dashboard</a>
+    </div>
+
+    <!-- Grid coins -->
+    <div id="coinsGrid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"></div>
+  </div>
+
+<script>
+async function loadTopCoins() {
+  const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h`);
+  const coins = await res.json();
+  renderCoins(coins);
+}
+
+function fmtUSD(n) {
+  return n?.toLocaleString(undefined, { style: "currency", currency: "USD" });
+}
+
+function renderCoins(coins) {
+  const grid = document.getElementById("coinsGrid");
+  grid.innerHTML = "";
+
+  coins.forEach(c => {
+    const card = document.createElement("div");
+    card.className = "rounded-2xl bg-neutral-900/50 border border-white/10 p-4 transition hover:bg-neutral-800/50";
+
+    card.innerHTML = `
+      <div class="flex items-center gap-3">
+        <img src="${c.image}" alt="${c.symbol}" class="h-8 w-8 rounded-full" />
+        <div>
+          <div class="font-semibold">${c.name}</div>
+          <div class="text-xs uppercase text-neutral-400">${c.symbol}</div>
+        </div>
+        <div class="ml-auto text-right">
+          <div class="font-semibold">${fmtUSD(c.current_price)}</div>
+          <div class="text-sm ${c.price_change_percentage_24h >= 0 ? 'text-green-400' : 'text-red-400'}">
+            ${c.price_change_percentage_24h.toFixed(2)}%
+          </div>
+        </div>
+      </div>
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+// Jalankan saat halaman dibuka
+document.addEventListener("DOMContentLoaded", loadTopCoins);
+</script>
+
+</body>
+</html>
