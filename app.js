@@ -169,29 +169,40 @@ function themeInit() {
   };
 }
 
-/* Sidebar toggle & menu click binding */
+/* Sidebar toggle (versi baru) */
 function menuInit() {
   const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay");
   const mainContent = document.getElementById("mainContent");
+  const btnOpen = document.getElementById("menuBtn");
+  const btnClose = document.getElementById("closeSidebar");
 
-  document.getElementById("menuBtn").onclick = () => {
-    const collapsed = sidebar.classList.toggle("collapsed");
+  const openSidebar = () => {
+    sidebar.classList.add("open");
+    overlay.classList.add("show");
     if (window.innerWidth >= 768) {
-      mainContent.classList.toggle("sidebar-closed", collapsed);
-      mainContent.classList.toggle("sidebar-open", !collapsed);
+      mainContent.classList.add("sidebar-open");
+      mainContent.classList.remove("sidebar-closed");
     }
   };
 
-  document.querySelectorAll("#sidebar a[data-action]").forEach(link => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault();
-      const act = link.dataset.action;
-      if (act === "my-assets") loadMyAssets();
-      if (act === "top-coins") loadTopCoins();
-      if (act === "top-rwa") loadRWACoins();
-      if (act === "trending") loadTrendingCoins();
-      if (window.innerWidth < 768) sidebar.classList.add("collapsed");
-    });
+  const closeSidebar = () => {
+    sidebar.classList.remove("open");
+    overlay.classList.remove("show");
+    if (window.innerWidth >= 768) {
+      mainContent.classList.remove("sidebar-open");
+      mainContent.classList.add("sidebar-closed");
+    }
+  };
+
+  btnOpen.addEventListener("click", openSidebar);
+  btnClose.addEventListener("click", closeSidebar);
+  overlay.addEventListener("click", closeSidebar);
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth < 768) {
+      closeSidebar();
+    }
   });
 }
 
