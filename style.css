@@ -1,17 +1,36 @@
 body {
     font-family: Arial, sans-serif;
     padding: 20px;
+    background-color: #0d1117;
+    color: white;
+}
+h1 {
+    text-align: center;
 }
 button {
-    padding: 8px 15px;
-    background-color: #4CAF50;
+    padding: 10px 20px;
+    background-color: #ff9800;
     color: white;
     border: none;
     cursor: pointer;
+    margin-bottom: 20px;
 }
 button:hover {
-    background-color: #45a049;
+    background-color: #e68900;
 }
-#portfolio {
+#portfolio, #topCoins {
     margin-top: 20px;
+}
+.coin-item {
+    padding: 10px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between;
+}
+.marquee-coin {
+    margin-right: 20px;
+    cursor: pointer;
+}
+.marquee-coin:hover {
+    text-decoration: underline;
 }
