@@ -1,29 +1,36 @@
+<!-- ✅ index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Crypto Portfolio Tracker</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crypto Price Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet"/>
 </head>
 <body>
+  <!-- Running Ticker -->
+  <div id="ticker"></div>
+
+  <!-- Header -->
   <header>
-    <h1>Crypto Portfolio Tracker</h1>
-    <button id="connectBtn">Connect Wallet</button>
+    <h1>Crypto Price Tracker</h1>
+    <button id="connectWalletBtn">Connect Wallet</button>
   </header>
 
-  <!-- Info wallet -->
-  <div id="walletInfo" class="wallet-info" style="display:none;">
+  <!-- Wallet Info -->
+  <div id="walletInfo" class="hidden">
     <p><strong>Address:</strong> <span id="walletAddress"></span></p>
-    <p><strong>Balance:</strong> <span id="walletBalance"></span></p>
+    <p><strong>Balance:</strong> <span id="walletBalance"></span> ETH</p>
   </div>
 
-  <!-- Running text untuk top 10 coin -->
-  <marquee id="coinMarquee" behavior="scroll" direction="left"></marquee>
+  <!-- Top 10 Coins -->
+  <section id="coinsGrid"></section>
 
-  <!-- Top coin list -->
-  <div id="topCoins"></div>
+  <!-- Modal Detail Coin -->
+  <div id="coinModal" class="hidden"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.0/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
