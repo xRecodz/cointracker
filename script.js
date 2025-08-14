@@ -1,12 +1,22 @@
 const connectBtn = document.getElementById("connectBtn");
-const portfolioDiv = document.getElementById("portfolio");
+const walletInfoDiv = document.getElementById("walletInfo");
+const walletAddressEl = document.getElementById("walletAddress");
+const walletBalanceEl = document.getElementById("walletBalance");
 const topCoinsDiv = document.getElementById("topCoins");
 const coinMarquee = document.getElementById("coinMarquee");
 
 let provider, signer, userAddress;
 
-// Connect wallet (support MetaMask & OKX)
+// Connect / Disconnect wallet
 connectBtn.onclick = async () => {
+    if (userAddress) {
+        // Disconnect
+        userAddress = null;
+        walletInfoDiv.style.display = "none";
+        connectBtn.textContent = "Connect Wallet";
+        return;
+    }
+
     const walletProvider = window.ethereum || window.okxwallet;
     if (!walletProvider) {
         alert("Please install MetaMask or OKX Wallet!");
@@ -16,14 +26,15 @@ connectBtn.onclick = async () => {
         provider = new ethers.BrowserProvider(walletProvider);
         signer = await provider.getSigner();
         userAddress = await signer.getAddress();
-        console.log("Connected:", userAddress);
+        connectBtn.textContent = "Disconnect";
+        walletInfoDiv.style.display = "block";
         loadPortfolio();
     } catch (err) {
         console.error("Error connecting:", err);
     }
 };
 
-// Load portfolio (default ETH)
+// Load portfolio
 async function loadPortfolio(coinId = "ethereum") {
     const balanceWei = await provider.getBalance(userAddress);
     const balance = parseFloat(ethers.formatEther(balanceWei));
@@ -32,14 +43,8 @@ async function loadPortfolio(coinId = "ethereum") {
     const prices = await res.json();
     const price = prices[coinId].usd;
 
-    const totalValue = balance * price;
-
-    portfolioDiv.innerHTML = `
-        <p>Address: ${userAddress}</p>
-        <p>Balance: ${balance.toFixed(4)} ${coinId.toUpperCase()}</p>
-        <p>Price: $${price}</p>
-        <h3>Total Value: $${totalValue.toFixed(2)}</h3>
-    `;
+    walletAddressEl.textContent = userAddress;
+    walletBalanceEl.textContent = `${balance.toFixed(4)} ${coinId.toUpperCase()} ($${(balance * price).toFixed(2)})`;
 }
 
 // Load top 10 coins
@@ -49,13 +54,13 @@ async function loadTopCoins() {
     );
     const data = await res.json();
 
-    // List in marquee
+    // Marquee
     coinMarquee.innerHTML = data
         .map(coin => `<span class="marquee-coin" onclick="loadPortfolio('${coin.id}')">${coin.symbol.toUpperCase()}: $${coin.current_price}</span>`)
         .join(" ");
 
-    // List in normal div
-    topCoinsDiv.innerHTML = "<h2>Top 10 Coins</h2>" + data
+    // List
+    topCoinsDiv.innerHTML = "<h2 style='margin-left:15px;'>Top 10 Coins</h2>" + data
         .map(coin => `
             <div class="coin-item" onclick="loadPortfolio('${coin.id}')">
                 <span>${coin.market_cap_rank}. ${coin.name} (${coin.symbol.toUpperCase()})</span>
@@ -65,6 +70,6 @@ async function loadTopCoins() {
         .join("");
 }
 
-// First load
+// Load coin data on start
 loadTopCoins();
-setInterval(loadTopCoins, 60000); // Update every 1 min
+setInterval(loadTopCoins, 60000);
