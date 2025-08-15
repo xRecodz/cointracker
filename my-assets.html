@@ -1,26 +1,185 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Portfolio Overview</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-neutral-950 text-neutral-100 font-inter">
 
-  <div class="max-w-7xl mx-auto px-4 py-8">
-    <h1 class="text-2xl font-bold mb-4">💼 Portfolio Overview</h1>
-    <div class="rounded-2xl bg-neutral-900/50 border border-white/10 p-6">
-      <p class="text-neutral-300">
-        Halaman ini akan menampilkan ringkasan aset dan performa portofolio kamu.
-      </p>
+  <!-- HEADER -->
+  <header class="sticky top-0 z-30 backdrop-blur bg-neutral-950/70 border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+      <div class="flex items-center gap-3">
+        <button id="menuBtn" class="h-8 w-8 rounded-full bg-yellow-500 hover:bg-yellow-600 flex items-center justify-center text-neutral-900 shadow-soft">☰</button>
+        <span class="font-semibold tracking-tight">FinVault</span>
+      </div>
     </div>
+  </header>
 
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-neutral-900 border-r border-white/10 p-4 z-40 transform -translate-x-full transition-transform">
+    <div class="flex items-center justify-between mb-6 border-b border-white/10 pb-3">
+      <a href="index.html" class="flex items-center text-white hover:text-brand">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m-4 0h8m4 0h-4v-8m0 0L5 10" />
+        </svg>
+      </a>
+      <button id="closeSidebar" class="text-neutral-400 hover:text-white text-xl">&times;</button>
+    </div>
+    <nav class="grid gap-6">
+      <div class="border-b border-white/10 pb-3">
+        <div class="uppercase text-xs text-neutral-400 mb-2">MY ASSETS 👜</div>
+        <ul class="space-y-2">
+          <li><a href="my-assets.html" class="block py-1 px-2 rounded hover:bg-neutral-800 hover:text-brand transition">Assets</a></li>
+        </ul>
+      </div>
+      <div class="border-b border-white/10 pb-3">
+        <div class="uppercase text-xs text-neutral-400 mb-2">TOP COIN 🪙</div>
+        <ul class="space-y-2">
+          <li><a href="top-coins.html" class="block py-1 px-2 rounded hover:bg-neutral-800 hover:text-brand transition">Top 100 Coins</a></li>
+        </ul>
+      </div>
+      <div class="border-b border-white/10 pb-3">
+        <div class="uppercase text-xs text-neutral-400 mb-2">TOP RWA COIN 🏦</div>
+        <ul class="space-y-2">
+          <li><a href="top-rwa.html" class="block py-1 px-2 rounded hover:bg-neutral-800 hover:text-brand transition">Top Real World Asset</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="uppercase text-xs text-neutral-400 mb-2">TRENDING 📈</div>
+        <ul class="space-y-2">
+          <li><a href="trending.html" class="block py-1 px-2 rounded hover:bg-neutral-800 hover:text-brand transition">Trending Coins</a></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-2xl font-bold">💼 Portfolio Overview</h1>
+      <button id="walletActionBtn" class="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-4 rounded-lg shadow transition">
+        Connect Wallet
+      </button>
+    </div>
+    <p class="text-neutral-300 mb-4">
+      Berikut adalah daftar aset yang terdeteksi di berbagai jaringan blockchain berdasarkan wallet yang terhubung.
+    </p>
+    <div id="assetsContainer" class="mt-4 grid gap-6">
+      <div class="text-neutral-400">Mengambil data aset...</div>
+    </div>
     <div class="mt-6">
-      <a href="index.html" class="text-brand hover:underline">← Kembali ke Dashboard</a>
+      <a href="index.html" class="inline-block bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-4 rounded-lg shadow transition">
+        ← Kembali ke Halaman Awal
+      </a>
     </div>
   </div>
 
+  <script>
+    const COVALENT_API_KEY = "cqt_rQXkqQp4kGcwgCfgbgtYq8qdVQv9";
+    const chains = [
+      { name: "Ethereum", id: 1 },
+      { name: "Binance Smart Chain", id: 56 },
+      { name: "Polygon", id: 137 },
+      { name: "Arbitrum One", id: 42161 },
+      { name: "Optimism", id: 10 }
+    ];
+
+    const walletBtn = document.getElementById("walletActionBtn");
+    const assetsContainer = document.getElementById("assetsContainer");
+
+    async function loadAssets(address) {
+      assetsContainer.innerHTML = `<div class="text-neutral-400 p-4">Mengambil data aset...</div>`;
+      for (let chain of chains) {
+        try {
+          const res = await fetch(`https://api.covalenthq.com/v1/${chain.id}/address/${address}/balances_v2/?key=${COVALENT_API_KEY}`);
+          const json = await res.json();
+          if (!json.data?.items) continue;
+
+          const section = document.createElement("div");
+          section.className = "bg-neutral-900 border border-white/10 rounded-lg p-4";
+          section.innerHTML = `<h2 class="text-lg font-bold mb-3">${chain.name}</h2>`;
+
+          const tokens = json.data.items.filter(t => Number(t.balance) > 0);
+          if (tokens.length === 0) {
+            section.innerHTML += `<p class="text-neutral-500 text-sm">Tidak ada aset di jaringan ini.</p>`;
+          } else {
+            tokens.forEach(token => {
+              const amount = token.balance / (10 ** token.contract_decimals);
+              const amountUsd = token.quote ? `$${token.quote.toFixed(2)}` : "-";
+              section.innerHTML += `
+                <div class="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
+                  <img src="${token.logo_url || 'https://via.placeholder.com/24'}" class="h-6 w-6 rounded-full">
+                  <span>${token.contract_name || 'Unknown'} (${token.contract_ticker_symbol || ''})</span>
+                  <span class="ml-auto text-yellow-400">${amount.toFixed(4)}</span>
+                  <span class="ml-4 text-neutral-400 text-sm">${amountUsd}</span>
+                </div>
+              `;
+            });
+          }
+          assetsContainer.appendChild(section);
+        } catch (err) {
+          console.error(`Error loading ${chain.name}`, err);
+        }
+      }
+    }
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert("MetaMask tidak ditemukan.");
+        return;
+      }
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (accounts.length > 0) {
+        walletBtn.textContent = "Disconnect Wallet";
+        walletBtn.onclick = disconnectWallet;
+        loadAssets(accounts[0]);
+      }
+    }
+
+    function disconnectWallet() {
+      assetsContainer.innerHTML = `<p class="text-yellow-500 p-4">Wallet terputus.</p>`;
+      walletBtn.textContent = "Connect Wallet";
+      walletBtn.onclick = connectWallet;
+    }
+
+    async function initWalletStatus() {
+      if (!window.ethereum) {
+        assetsContainer.innerHTML = `<p class="text-red-500">MetaMask tidak ditemukan.</p>`;
+        return;
+      }
+      const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+      if (accounts.length > 0) {
+        walletBtn.textContent = "Disconnect Wallet";
+        walletBtn.onclick = disconnectWallet;
+        loadAssets(accounts[0]);
+      } else {
+        walletBtn.onclick = connectWallet;
+      }
+      window.ethereum.on('accountsChanged', (accounts) => {
+        if (accounts.length > 0) {
+          walletBtn.textContent = "Disconnect Wallet";
+          walletBtn.onclick = disconnectWallet;
+          loadAssets(accounts[0]);
+        } else {
+          disconnectWallet();
+        }
+      });
+    }
+
+    initWalletStatus();
+
+    // Sidebar toggle
+    document.getElementById("menuBtn").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.toggle("-translate-x-full");
+    });
+    document.getElementById("closeSidebar").addEventListener("click", () => {
+      document.getElementById("sidebar").classList.add("-translate-x-full");
+    });
+  </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crypto Dashboard Pro</title>
+  <title>CoinTracker🚀</title>
 
   <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
@@ -42,7 +42,7 @@
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
       <div class="flex items-center gap-3">
         <button id="menuBtn" class="h-8 w-8 rounded-full bg-brand hover:bg-brand-dark flex items-center justify-center text-neutral-900 shadow-soft">☰</button>
-        <span class="font-semibold tracking-tight">Crypto Dashboard Pro</span>
+        <span class="font-semibold tracking-tight">CoinTracker 🪙</span>
       </div>
 
       <div class="ml-auto flex items-center gap-3">
@@ -110,38 +110,51 @@
   </header>
 
   <!-- SIDEBAR dengan tombol X -->
-  <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-neutral-900 border-r border-white/10 p-4 z-40 transform -translate-x-full transition-transform">
-    <div class="flex items-center justify-between mb-4">
-      <div class="font-bold text-lg">MENU</div>
-      <button id="closeSidebar" class="text-neutral-400 hover:text-white text-xl">&times;</button>
-    </div>
-    <nav class="space-y-4">
-      <div>
-        <div class="uppercase text-xs text-neutral-400">MY ASSETS 👜</div>
-        <ul class="space-y-2 mt-1">
-          <li><a href="my-assets.html" data-action="my-assets" class="hover:text-brand">Assets</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="uppercase text-xs text-neutral-400">TOP COIN 🪙</div>
-        <ul class="space-y-2 mt-1">
-          <li><a href="top-coins.html" data-action="top-coins" class="hover:text-brand">Top 100 Coins</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="uppercase text-xs text-neutral-400">TOP RWA COIN 🏦</div>
-        <ul class="space-y-2 mt-1">
-          <li><a href="top-rwa.html" data-action="top-rwa" class="hover:text-brand">Top Real World Asset</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="uppercase text-xs text-neutral-400">TRENDING 📈</div>
-        <ul class="space-y-2 mt-1">
-          <li><a href="trending.html" data-action="trending" class="hover:text-brand">Trending Coins</a></li>
-        </ul>
-      </div>
-    </nav>
-  </aside>
+<aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-neutral-900 border-r border-white/10 p-4 z-40 transform -translate-x-full transition-transform">
+  <div class="flex items-center justify-between mb-6 border-b border-white/10 pb-3">
+    <!-- Tombol Home -->
+    <a href="index.html" class="flex items-center text-white hover:text-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m-4 0h8m4 0h-4v-8m0 0L5 10" />
+      </svg>
+    </a>
+    <!-- Tombol Close -->
+    <button id="closeSidebar" class="text-neutral-400 hover:text-white text-xl">&times;</button>
+  </div>
+
+  <!-- Gunakan grid layout -->
+<nav class="grid gap-6">
+  <div class="border-b border-white/10 pb-3">
+    <div class="uppercase text-xs text-neutral-400 mb-2">MY ASSETS 👜</div>
+    <ul class="space-y-2">
+      <li><a href="my-assets.html" data-action="my-assets" class="block py-1 px-2 rounded hover:bg-neutral-800 hover:text-brand transition">Assets</a></li>
+    </ul>
+  </div>
+  
+  <div class="border-b border-white/10 pb-3">
+    <div class="uppercase text-xs text-neutral-400 mb-2">TOP COIN 🪙</div>
+    <ul class="space-y-2">
+      <li><a href="top-coins.html" data-action="top-coins" class="block py-1 px-2 rounded hover:bg-neutral-800 hover:text-brand transition">Top 100 Coins</a></li>
+    </ul>
+  </div>
+  
+  <div class="border-b border-white/10 pb-3">
+    <div class="uppercase text-xs text-neutral-400 mb-2">TOP RWA COIN 🏦</div>
+    <ul class="space-y-2">
+      <li><a href="top-rwa.html" data-action="top-rwa" class="block py-1 px-2 rounded hover:bg-neutral-800 hover:text-brand transition">Top Real World Asset</a></li>
+    </ul>
+  </div>
+  
+  <div class="border-b border-white/10 pb-3">
+    <div class="uppercase text-xs text-neutral-400 mb-2">TRENDING 📈</div>
+    <ul class="space-y-2">
+      <li><a href="trending.html" data-action="trending" class="block py-1 px-2 rounded hover:bg-neutral-800 hover:text-brand transition">Trending Coins</a></li>
+    </ul>
+  </div>
+</nav>
+</aside>
+
 
   <!-- HERO -->
   <section class="hero-bg">
@@ -163,20 +176,22 @@
     </div>
   </div>
 
-  <!-- Script -->
-  <script>
-    const sidebar = document.getElementById("sidebar");
-    const menuBtn = document.getElementById("menuBtn");
-    const closeSidebar = document.getElementById("closeSidebar");
+ <!-- Script -->
+<script>
+  const sidebar = document.getElementById("sidebar");
+  const menuBtn = document.getElementById("menuBtn");
+  const closeSidebar = document.getElementById("closeSidebar");
 
-    menuBtn.addEventListener("click", () => {
-      sidebar.classList.remove("-translate-x-full");
-    });
+  // Toggle sidebar saat tombol ☰ diklik
+  menuBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("-translate-x-full");
+  });
 
-    closeSidebar.addEventListener("click", () => {
-      sidebar.classList.add("-translate-x-full");
-    });
-  </script>
+  // Selalu tutup sidebar saat tombol X diklik
+  closeSidebar.addEventListener("click", () => {
+    sidebar.classList.add("-translate-x-full");
+  });
+</script>
 
   <script type="text/babel" src="app.js"></script>
 </body>

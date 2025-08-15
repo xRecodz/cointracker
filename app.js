@@ -63,11 +63,124 @@ function App() {
     setCoins(trendingData);
     buildTicker(trendingData);
   }
-  async function loadMyAssets() {
-    const data = await api.coins("&ids=bitcoin,ethereum");
-    setCoins(data);
-    buildTicker(data);
+
+  // ==== ORIGINAL loadMyAssets ====
+async function loadMyAssets() {
+  const data = await api.coins("&ids=bitcoin,ethereum");
+  setCoins(data);
+  buildTicker(data);
+
+  // ==== Tampilan awal dengan tombol wallet ====
+  const root = document.getElementById("app-root");
+  root.innerHTML = `
+    <div class="flex justify-between items-center mb-4">
+      <h2 class="text-xl font-bold">💼 My Assets</h2>
+      <button id="walletActionBtn" class="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-2 px-4 rounded-lg shadow transition">
+        Connect Wallet
+      </button>
+    </div>
+    <div id="assetsContainer" class="grid gap-4"></div>
+  `;
+
+  const walletBtn = document.getElementById("walletActionBtn");
+  const assetsContainer = document.getElementById("assetsContainer");
+
+  const COVALENT_API_KEY = "YOUR_API_KEY"; // Ganti dengan API Key kamu
+  const chainsList = [
+    { name: "Ethereum", id: 1 },
+    { name: "Binance Smart Chain", id: 56 },
+    { name: "Polygon", id: 137 },
+    { name: "Arbitrum One", id: 42161 },
+    { name: "Optimism", id: 10 }
+  ];
+
+  // ==== Fungsi ambil data multi-chain ====
+  async function loadAssetsMultiChain(address) {
+    assetsContainer.innerHTML = `<div class="text-neutral-400 p-4">Mengambil data aset...</div>`;
+
+    for (let chain of chainsList) {
+      try {
+        const res = await fetch(`https://api.covalenthq.com/v1/${chain.id}/address/${address}/balances_v2/?key=${COVALENT_API_KEY}`);
+        const json = await res.json();
+
+        if (!json.data?.items) continue;
+
+        const section = document.createElement("div");
+        section.className = "bg-neutral-900 border border-white/10 rounded-lg p-4";
+        section.innerHTML = `<h3 class="text-lg font-bold mb-3">${chain.name}</h3>`;
+
+        const tokens = json.data.items.filter(t => Number(t.balance) > 0);
+        if (tokens.length === 0) {
+          section.innerHTML += `<p class="text-neutral-500 text-sm">Tidak ada aset di jaringan ini.</p>`;
+        } else {
+          tokens.forEach(token => {
+            const amount = token.balance / (10 ** token.contract_decimals);
+            const amountUsd = token.quote ? `$${token.quote.toFixed(2)}` : "-";
+            section.innerHTML += `
+              <div class="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
+                <img src="${token.logo_url || 'https://via.placeholder.com/24'}" class="h-6 w-6 rounded-full">
+                <span>${token.contract_name || 'Unknown'} (${token.contract_ticker_symbol || ''})</span>
+                <span class="ml-auto text-yellow-400">${amount.toFixed(4)}</span>
+                <span class="ml-4 text-neutral-400 text-sm">${amountUsd}</span>
+              </div>
+            `;
+          });
+        }
+
+        assetsContainer.appendChild(section);
+      } catch (err) {
+        console.error(`Error loading ${chain.name}`, err);
+      }
+    }
   }
+
+  // ==== Fungsi connect wallet ====
+  async function connectWallet() {
+    if (!window.ethereum) {
+      alert("MetaMask tidak ditemukan.");
+      return;
+    }
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (accounts.length > 0) {
+      walletBtn.textContent = "Disconnect Wallet";
+      walletBtn.onclick = disconnectWallet;
+      loadAssetsMultiChain(accounts[0]);
+    }
+  }
+
+  // ==== Fungsi disconnect wallet ====
+  function disconnectWallet() {
+    assetsContainer.innerHTML = `<p class="text-yellow-500 p-4">Wallet terputus.</p>`;
+    walletBtn.textContent = "Connect Wallet";
+    walletBtn.onclick = connectWallet;
+  }
+
+  // ==== Cek status awal ====
+  if (window.ethereum) {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (accounts.length > 0) {
+      walletBtn.textContent = "Disconnect Wallet";
+      walletBtn.onclick = disconnectWallet;
+      loadAssetsMultiChain(accounts[0]);
+    } else {
+      walletBtn.onclick = connectWallet;
+    }
+
+    // Auto update jika user ganti akun di MetaMask
+    window.ethereum.on('accountsChanged', (accounts) => {
+      if (accounts.length > 0) {
+        walletBtn.textContent = "Disconnect Wallet";
+        walletBtn.onclick = disconnectWallet;
+        loadAssetsMultiChain(accounts[0]);
+      } else {
+        disconnectWallet();
+      }
+    });
+  } else {
+    walletBtn.onclick = connectWallet;
+  }
+}
+
 
   async function openCoinModal(coin) {
     setSelectedCoin(coin);
@@ -160,13 +273,40 @@ function menuInit() {
   const sidebar = document.getElementById("sidebar");
   document.querySelectorAll("#sidebar a[data-action]").forEach(link => {
     link.addEventListener("click", (e) => {
-      e.preventDefault();
       const act = link.dataset.action;
-      if (act === "my-assets") loadMyAssets();
-      if (act === "top-coins") loadTopCoins();
-      if (act === "top-rwa") loadRWACoins();
-      if (act === "trending") loadTrendingCoins();
-      if (window.innerWidth < 768) sidebar.classList.add("-translate-x-full");
+      
+      // Cek apakah fungsi khusus ada
+      let handled = false;
+      if (act === "my-assets" && typeof loadMyAssets === "function") {
+        e.preventDefault();
+        loadMyAssets();
+        handled = true;
+      }
+      if (act === "top-coins" && typeof loadTopCoins === "function") {
+        e.preventDefault();
+        loadTopCoins();
+        handled = true;
+      }
+      if (act === "top-rwa" && typeof loadRWACoins === "function") {
+        e.preventDefault();
+        loadRWACoins();
+        handled = true;
+      }
+      if (act === "trending" && typeof loadTrendingCoins === "function") {
+        e.preventDefault();
+        loadTrendingCoins();
+        handled = true;
+      }
+
+      // Tutup sidebar jika mobile
+      if (window.innerWidth < 768) {
+        sidebar.classList.add("-translate-x-full");
+      }
+
+      // Jika tidak ada handler JS, biarkan klik kiri buka href normal
+      if (!handled) {
+        window.location.href = link.href;
+      }
     });
   });
 }
@@ -250,6 +390,9 @@ function connectWalletInit() {
 
       connectBtn.classList.add("hidden");
       profile.classList.remove("hidden");
+
+      // Simpan status connect
+      localStorage.setItem("walletConnected", "true");
     } catch (err) { console.error(err); }
   };
 
@@ -259,11 +402,46 @@ function connectWalletInit() {
     profile.classList.add("hidden");
     walletDropdown.classList.add("hidden");
     connectBtn.classList.remove("hidden");
+    localStorage.removeItem("walletConnected");
   };
 
   document.addEventListener("click", (e) => {
     if (!walletBtn.contains(e.target) && !walletDropdown.contains(e.target)) walletDropdown.classList.add("hidden");
   });
+
+  // 🔹 Auto-connect jika sebelumnya sudah connect
+  if (localStorage.getItem("walletConnected") && window.ethereum) {
+    connectBtn.click();
+  }
+
+  // 🔹 Update UI saat user switch account / disconnect
+  if (window.ethereum) {
+    window.ethereum.on("accountsChanged", async (accounts) => {
+      if (accounts.length > 0) {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        const addr = await signer.getAddress();
+        const balanceWei = await provider.getBalance(addr);
+        const balanceEth = parseFloat(ethers.formatEther(balanceWei));
+        const price = (await api.simplePrice("ethereum")).ethereum.usd;
+        const balanceUsd = fmtUSD(balanceEth * price);
+
+        balanceText.textContent = balanceUsd;
+        addrShort.textContent = addr.slice(0, 6) + "..." + addr.slice(-4);
+        addrFull.textContent = addr;
+        balanceFull.textContent = balanceUsd;
+
+        connectBtn.classList.add("hidden");
+        profile.classList.remove("hidden");
+      } else {
+        // Jika semua akun di disconnect
+        profile.classList.add("hidden");
+        walletDropdown.classList.add("hidden");
+        connectBtn.classList.remove("hidden");
+        localStorage.removeItem("walletConnected");
+      }
+    });
+  }
 }
 
 async function refreshBalance(cgId) {
