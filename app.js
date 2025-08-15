@@ -169,40 +169,29 @@ function themeInit() {
   };
 }
 
-/* Sidebar toggle (versi baru) */
+/* Sidebar toggle & menu click binding */
 function menuInit() {
   const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("overlay");
   const mainContent = document.getElementById("mainContent");
-  const btnOpen = document.getElementById("menuBtn");
-  const btnClose = document.getElementById("closeSidebar");
 
-  const openSidebar = () => {
-    sidebar.classList.add("open");
-    overlay.classList.add("show");
+  document.getElementById("menuBtn").onclick = () => {
+    const collapsed = sidebar.classList.toggle("collapsed");
     if (window.innerWidth >= 768) {
-      mainContent.classList.add("sidebar-open");
-      mainContent.classList.remove("sidebar-closed");
+      mainContent.classList.toggle("sidebar-closed", collapsed);
+      mainContent.classList.toggle("sidebar-open", !collapsed);
     }
   };
 
-  const closeSidebar = () => {
-    sidebar.classList.remove("open");
-    overlay.classList.remove("show");
-    if (window.innerWidth >= 768) {
-      mainContent.classList.remove("sidebar-open");
-      mainContent.classList.add("sidebar-closed");
-    }
-  };
-
-  btnOpen.addEventListener("click", openSidebar);
-  btnClose.addEventListener("click", closeSidebar);
-  overlay.addEventListener("click", closeSidebar);
-
-  window.addEventListener("resize", () => {
-    if (window.innerWidth < 768) {
-      closeSidebar();
-    }
+  document.querySelectorAll("#sidebar a[data-action]").forEach(link => {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const act = link.dataset.action;
+      if (act === "my-assets") loadMyAssets();
+      if (act === "top-coins") loadTopCoins();
+      if (act === "top-rwa") loadRWACoins();
+      if (act === "trending") loadTrendingCoins();
+      if (window.innerWidth < 768) sidebar.classList.add("collapsed");
+    });
   });
 }
 

@@ -48,6 +48,7 @@
       <div class="ml-auto flex items-center gap-3">
         <!-- Change Network -->
         <div class="relative">
+            <!-- Button utama untuk ganti network -->
             <button id="chainBtn"
               class="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold bg-neutral-900 border border-white/10 hover:bg-neutral-800 transition">
               <img id="chainIcon" src="/assets/eth.svg" class="w-4 h-4" alt="Ethereum" />
@@ -62,16 +63,22 @@
             <!-- Dropdown pilihan network -->
             <div id="chainMenu"
               class="hidden absolute right-0 mt-2 w-48 bg-neutral-900 border border-white/10 rounded-xl shadow-lg z-50">
+              
+              <!-- Ethereum -->
               <button data-chain="ethereum|ethereum|ETH|0x1|/assets/eth.svg"
                 class="flex items-center gap-2 px-4 py-2 w-full text-left hover:bg-neutral-800">
                 <img src="/assets/eth.svg" class="w-4 h-4" alt="Ethereum" />
                 <span>Ethereum</span>
               </button>
+          
+              <!-- Binance Smart Chain -->
               <button data-chain="bsc|binancecoin|BNB|0x38|/assets/bnb.png"
                 class="flex items-center gap-2 px-4 py-2 w-full text-left hover:bg-neutral-800">
                 <img src="/assets/bnb.png" class="w-4 h-4" alt="BSC" />
                 <span>BSC</span>
               </button>
+          
+              <!-- Polygon -->
               <button data-chain="polygon|matic-network|MATIC|0x89|/assets/polygon.png"
                 class="flex items-center gap-2 px-4 py-2 w-full text-left hover:bg-neutral-800">
                 <img src="/assets/polygon.png" class="w-4 h-4" alt="Polygon" />
@@ -79,13 +86,13 @@
               </button>
             </div>
           </div>
-
-        <!-- Wallet Profile -->
+        <!-- Wallet Profile Menu (Hidden by default) -->
         <div id="walletProfile" class="hidden relative">
           <button id="walletBtn" class="flex items-center gap-2 px-3 py-1 bg-neutral-900 border border-white/10 rounded-xl hover:bg-neutral-800 transition">
             <img src="/assets/profile.png" class="w-6 h-6 rounded-full border-2 border-brand" id="walletIcon" alt="Profile"/>
             <span id="walletBalanceText" class="text-sm"></span>
           </button>
+          <!-- Dropdown -->
           <div id="walletDropdown" class="hidden absolute right-0 mt-2 w-48 bg-neutral-900 border border-white/10 rounded-xl shadow-lg z-50 p-3 text-sm">
             <div class="text-neutral-400 text-xs mb-2">Address</div>
             <div id="walletAddrShort" class="font-mono text-xs mb-3 truncate"></div>
@@ -93,7 +100,7 @@
           </div>
         </div>
 
-        <!-- Connect Wallet -->
+        <!-- Connect Wallet Button -->
         <button id="connectBtn" class="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold bg-brand text-neutral-900 hover:bg-brand-dark transition shadow-soft">
           <span>Connect Wallet</span>
         </button>
@@ -102,41 +109,38 @@
   </header>
 
   <!-- SIDEBAR -->
-  <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-neutral-900 border-r border-white/10 p-4 z-40 transition-transform -translate-x-full">
-    <!-- Tombol Close -->
-    <button id="closeSidebar" class="absolute top-4 right-4 text-neutral-400 hover:text-white text-2xl">&times;</button>
-    
+  <aside id="sidebar" class="fixed top-0 left-0 w-64 h-full bg-neutral-900 border-r border-white/10 p-4 z-40 transition-transform translate-x-0">
     <div class="font-bold text-lg mb-4">MENU</div>
     <nav class="space-y-4">
-      <div>
-        <div class="uppercase text-xs text-neutral-400">MY ASSETS 👜</div>
-        <ul class="space-y-2 mt-1">
-          <li><a href="my-assets.html" class="hover:text-brand">Assets</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="uppercase text-xs text-neutral-400">TOP COIN 🪙</div>
-        <ul class="space-y-2 mt-1">
-          <li><a href="top-coins.html" class="hover:text-brand">Top 100 Coins</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="uppercase text-xs text-neutral-400">TOP RWA COIN 🏦</div>
-        <ul class="space-y-2 mt-1">
-          <li><a href="top-rwa.html" class="hover:text-brand">Top Real World Asset</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="uppercase text-xs text-neutral-400">Trending 📈</div>
-        <ul class="space-y-2 mt-1">
-          <li><a href="trending.html" class="hover:text-brand">Trending Coins</a></li>
-        </ul>
-      </div>
+        <div>
+            <div class="uppercase text-xs text-neutral-400">MY ASSETS 👜</div>
+            <ul class="space-y-2 mt-1">
+              <li><a href="my-assets.html" class="hover:text-brand">Assets</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <div class="uppercase text-xs text-neutral-400">TOP COIN 🪙</div>
+            <ul class="space-y-2 mt-1">
+              <li><a href="top-coins.html" class="hover:text-brand">Top 100 Coins</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <div class="uppercase text-xs text-neutral-400">TOP RWA COIN 🏦</div>
+            <ul class="space-y-2 mt-1">
+              <li><a href="top-rwa.html" class="hover:text-brand">Top Real World Asset</a></li>
+            </ul>
+          </div>
+          
+          <div>
+            <div class="uppercase text-xs text-neutral-400">Trending 📈</div>
+            <ul class="space-y-2 mt-1">
+              <li><a href="trending.html" class="hover:text-brand">Trending Coins</a></li>
+            </ul>
+          </div>
     </nav>
   </aside>
-
-  <!-- Overlay -->
-  <div id="overlay" class="fixed inset-0 bg-black/50 hidden z-30"></div>
 
   <!-- HERO -->
   <section class="hero-bg">
@@ -147,7 +151,7 @@
   </section>
 
   <!-- MAIN APP -->
-  <main id="mainContent" class="transition-all max-w-7xl mx-auto px-4 py-8 md:pl-64">
+  <main id="mainContent" class="transition-all max-w-7xl mx-auto px-4 py-8 pl-64">
     <div id="app-root"></div>
   </main>
 
