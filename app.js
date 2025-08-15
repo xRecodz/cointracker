@@ -21,12 +21,6 @@ const api = {
   }
 };
 
-const CHAINS = {
-  ethereum: { cgId: "ethereum", symbol: "ETH" },
-  bsc: { cgId: "binancecoin", symbol: "BNB" },
-  polygon: { cgId: "matic-network", symbol: "MATIC" }
-};
-
 const fmtUSD = n =>
   n?.toLocaleString(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 });
 
@@ -43,7 +37,6 @@ function App() {
     chainInit();
     connectWalletInit();
     loadTopCoins();
-
     const iv = setInterval(loadTopCoins, 60000);
     return () => clearInterval(iv);
   }, []);
@@ -57,14 +50,12 @@ function App() {
     setCoins(data);
     buildTicker(data);
   }
-
   async function loadRWACoins() {
     const rwaIds = "chainlink,maker";
     const data = await api.coins(`&ids=${rwaIds}`);
     setCoins(data);
     buildTicker(data);
   }
-
   async function loadTrendingCoins() {
     const data = await api.trending();
     const ids = data.coins.map(c => c.item.id).join(",");
@@ -72,7 +63,6 @@ function App() {
     setCoins(trendingData);
     buildTicker(trendingData);
   }
-
   async function loadMyAssets() {
     const data = await api.coins("&ids=bitcoin,ethereum");
     setCoins(data);
@@ -89,16 +79,7 @@ function App() {
     const ctx = document.getElementById("cryptoChart").getContext("2d");
     const newChart = new Chart(ctx, {
       type: "line",
-      data: {
-        labels,
-        datasets: [{
-          data: prices,
-          borderColor: "#F4C542",
-          backgroundColor: "rgba(244,197,66,0.1)",
-          fill: true,
-          tension: 0.3
-        }]
-      },
+      data: { labels, datasets: [{ data: prices, borderColor: "#F4C542", backgroundColor: "rgba(244,197,66,0.1)", fill: true, tension: 0.3 }] },
       options: { responsive: true, plugins: { legend: { display: false } } }
     });
     setChartInstance(newChart);
@@ -113,11 +94,8 @@ function App() {
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {coins.map((c) => (
-          <div
-            key={c.id}
-            onClick={() => openCoinModal(c)}
-            className="rounded-2xl bg-neutral-900/50 border border-white/10 p-4 cursor-pointer hover:bg-neutral-800/50 transition flex flex-col"
-          >
+          <div key={c.id} onClick={() => openCoinModal(c)}
+            className="rounded-2xl bg-neutral-900/50 border border-white/10 p-4 cursor-pointer hover:bg-neutral-800/50 transition flex flex-col">
             <div className="flex items-center gap-2">
               <img src={c.image} alt={c.symbol} className="h-7 w-7 rounded-full" />
               <span className="font-semibold">{c.name}</span>
@@ -126,9 +104,7 @@ function App() {
             <div className={`text-sm mt-1 ${c.price_change_percentage_24h >= 0 ? "text-green-400" : "text-red-400"}`}>
               {c.price_change_percentage_24h?.toFixed(2)}%
             </div>
-            <div className="h-10 mt-2">
-              <canvas id={`spark-${c.id}`}></canvas>
-            </div>
+            <div className="h-10 mt-2"><canvas id={`spark-${c.id}`}></canvas></div>
           </div>
         ))}
       </div>
@@ -182,7 +158,6 @@ function themeInit() {
 
 function menuInit() {
   const sidebar = document.getElementById("sidebar");
-
   document.querySelectorAll("#sidebar a[data-action]").forEach(link => {
     link.addEventListener("click", (e) => {
       e.preventDefault();
@@ -191,9 +166,7 @@ function menuInit() {
       if (act === "top-coins") loadTopCoins();
       if (act === "top-rwa") loadRWACoins();
       if (act === "trending") loadTrendingCoins();
-      if (window.innerWidth < 768) {
-        sidebar.classList.add("-translate-x-full");
-      }
+      if (window.innerWidth < 768) sidebar.classList.add("-translate-x-full");
     });
   });
 }
@@ -203,31 +176,60 @@ function chainInit() {
   const menu = document.getElementById("chainMenu");
   const nameEl = document.getElementById("chainName");
   const iconEl = document.getElementById("chainIcon");
+
   btn.onclick = () => menu.classList.toggle("hidden");
+
   menu.querySelectorAll("button").forEach(item => {
     item.onclick = async () => {
-      const [key, , sym, chainId, icon] = item.dataset.chain.split("|");
+      const [key, cgId, sym, chainId, icon] = item.dataset.chain.split("|");
       nameEl.textContent = sym === "ETH" ? "Ethereum" : sym;
       iconEl.src = icon;
       menu.classList.add("hidden");
-      if (window.ethereum) {
-        try {
-          await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId }] });
-        } catch (err) { console.error(err); }
+      if (!window.ethereum) return alert("MetaMask not found");
+
+      try {
+        await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId }] });
+      } catch (err) {
+        if (err.code === 4902) {
+          const params = getAddNetworkParams(chainId);
+          if (params) {
+            await window.ethereum.request({ method: "wallet_addEthereumChain", params: [params] });
+          }
+        } else {
+          console.error(err);
+        }
       }
-      refreshBalance(key);
+      refreshBalance(cgId);
     };
   });
-  document.addEventListener("click", (e) => { if (!btn.contains(e.target) && !menu.contains(e.target)) menu.classList.add("hidden"); });
+
+  document.addEventListener("click", (e) => {
+    if (!btn.contains(e.target) && !menu.contains(e.target)) menu.classList.add("hidden");
+  });
+}
+
+function getAddNetworkParams(chainId) {
+  switch (chainId) {
+    case "0x1":
+      return { chainId: "0x1", chainName: "Ethereum Mainnet", nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: ["https://mainnet.infura.io/v3/"], blockExplorerUrls: ["https://etherscan.io"] };
+    case "0x38":
+      return { chainId: "0x38", chainName: "Binance Smart Chain", nativeCurrency: { name: "Binance Coin", symbol: "BNB", decimals: 18 }, rpcUrls: ["https://bsc-dataseed.binance.org/"], blockExplorerUrls: ["https://bscscan.com"] };
+    case "0x89":
+      return { chainId: "0x89", chainName: "Polygon Mainnet", nativeCurrency: { name: "MATIC", symbol: "MATIC", decimals: 18 }, rpcUrls: ["https://polygon-rpc.com/"], blockExplorerUrls: ["https://polygonscan.com"] };
+    default: return null;
+  }
 }
 
 function connectWalletInit() {
   const connectBtn = document.getElementById("connectBtn");
   const profile = document.getElementById("walletProfile");
   const walletBtn = document.getElementById("walletBtn");
-  const walletBalanceText = document.getElementById("walletBalanceText");
+  const walletDropdown = document.getElementById("walletDropdown");
+
+  const balanceText = document.getElementById("walletBalanceText");
   const addrShort = document.getElementById("walletAddrShort");
-  const dropdown = document.getElementById("walletDropdown");
+  const addrFull = document.getElementById("walletAddrFull");
+  const balanceFull = document.getElementById("walletBalanceFull");
 
   connectBtn.onclick = async () => {
     if (!window.ethereum) return alert("MetaMask not found");
@@ -236,48 +238,43 @@ function connectWalletInit() {
       await provider.send("eth_requestAccounts", []);
       const signer = await provider.getSigner();
       const addr = await signer.getAddress();
-      const balance = await provider.getBalance(addr);
-      const eth = parseFloat(ethers.formatEther(balance));
-      const cgId = CHAINS.ethereum.cgId;
-      const price = (await api.simplePrice(cgId))[cgId].usd;
-      const usdValue = fmtUSD(eth * price);
+      const balanceWei = await provider.getBalance(addr);
+      const balanceEth = parseFloat(ethers.formatEther(balanceWei));
+      const price = (await api.simplePrice("ethereum")).ethereum.usd;
+      const balanceUsd = fmtUSD(balanceEth * price);
 
-      walletBalanceText.textContent = usdValue;
+      balanceText.textContent = balanceUsd;
       addrShort.textContent = addr.slice(0, 6) + "..." + addr.slice(-4);
+      addrFull.textContent = addr;
+      balanceFull.textContent = balanceUsd;
 
       connectBtn.classList.add("hidden");
       profile.classList.remove("hidden");
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   };
 
-  walletBtn.onclick = () => {
-    dropdown.classList.toggle("hidden");
-  };
+  walletBtn.onclick = () => walletDropdown.classList.toggle("hidden");
 
   document.getElementById("disconnectWallet").onclick = () => {
     profile.classList.add("hidden");
-    dropdown.classList.add("hidden");
+    walletDropdown.classList.add("hidden");
     connectBtn.classList.remove("hidden");
   };
 
   document.addEventListener("click", (e) => {
-    if (!walletBtn.contains(e.target) && !dropdown.contains(e.target)) {
-      dropdown.classList.add("hidden");
-    }
+    if (!walletBtn.contains(e.target) && !walletDropdown.contains(e.target)) walletDropdown.classList.add("hidden");
   });
 }
 
-async function refreshBalance(key) {
+async function refreshBalance(cgId) {
   try {
     const provider = new ethers.BrowserProvider(window.ethereum);
     const signer = await provider.getSigner();
     const wei = await provider.getBalance(await signer.getAddress());
     const eth = parseFloat(ethers.formatEther(wei));
-    const cgId = CHAINS[key]?.cgId || "ethereum";
     const price = (await api.simplePrice(cgId))[cgId].usd;
-    document.getElementById("walletBalance").textContent = fmtUSD(eth * price);
+    document.getElementById("walletBalanceText").textContent = fmtUSD(eth * price);
+    document.getElementById("walletBalanceFull").textContent = fmtUSD(eth * price);
   } catch (e) { console.error(e); }
 }
 

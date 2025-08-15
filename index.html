@@ -79,17 +79,27 @@
         </div>
 
         <!-- Wallet Profile -->
-        <div id="walletProfile" class="hidden relative">
-          <button id="walletBtn" class="flex items-center gap-2 px-3 py-1 bg-neutral-900 border border-white/10 rounded-xl hover:bg-neutral-800 transition">
-            <img src="/assets/profile.png" class="w-6 h-6 rounded-full border-2 border-brand" id="walletIcon" alt="Profile"/>
-            <span id="walletBalanceText" class="text-sm"></span>
-          </button>
-          <div id="walletDropdown" class="hidden absolute right-0 mt-2 w-48 bg-neutral-900 border border-white/10 rounded-xl shadow-lg z-50 p-3 text-sm">
-            <div class="text-neutral-400 text-xs mb-2">Address</div>
-            <div id="walletAddrShort" class="font-mono text-xs mb-3 truncate"></div>
-            <button id="disconnectWallet" class="w-full text-left text-red-400 hover:text-red-500">Disconnect Wallet</button>
-          </div>
-        </div>
+<div id="walletProfile" class="hidden relative">
+  <button id="walletBtn" class="flex items-center gap-2 px-3 py-1 bg-neutral-900 border border-white/10 rounded-xl hover:bg-neutral-800 transition">
+    <img src="/assets/profile.png" class="w-6 h-6 rounded-full border-2 border-brand" id="walletIcon" alt="Profile"/>
+    <div class="text-left">
+      <div id="walletBalanceText" class="text-sm font-semibold">$0.00</div>
+      <div id="walletAddrShort" class="text-xs text-neutral-400">0x000...0000</div>
+    </div>
+  </button>
+  <div id="walletDropdown" class="hidden absolute right-0 mt-2 w-56 bg-neutral-900 border border-white/10 rounded-xl shadow-lg z-50 p-3 text-sm">
+    <div class="mb-3">
+      <div class="text-neutral-400 text-xs">Address</div>
+      <div id="walletAddrFull" class="font-mono text-xs break-all">0x0000000000000000000000000000000000000000</div>
+    </div>
+    <div class="mb-3">
+      <div class="text-neutral-400 text-xs">Balance</div>
+      <div id="walletBalanceFull" class="text-sm font-semibold">$0.00</div>
+    </div>
+    <button id="disconnectWallet" class="w-full text-left text-red-400 hover:text-red-500">Disconnect Wallet</button>
+  </div>
+</div>
+
 
         <!-- Connect Wallet Button -->
         <button id="connectBtn" class="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold bg-brand text-neutral-900 hover:bg-brand-dark transition shadow-soft">
@@ -109,25 +119,25 @@
       <div>
         <div class="uppercase text-xs text-neutral-400">MY ASSETS 👜</div>
         <ul class="space-y-2 mt-1">
-          <li><a href="#" data-action="my-assets" class="hover:text-brand">Assets</a></li>
+          <li><a href="my-assets.html" data-action="my-assets" class="hover:text-brand">Assets</a></li>
         </ul>
       </div>
       <div>
         <div class="uppercase text-xs text-neutral-400">TOP COIN 🪙</div>
         <ul class="space-y-2 mt-1">
-          <li><a href="#" data-action="top-coins" class="hover:text-brand">Top 100 Coins</a></li>
+          <li><a href="top-coins.html" data-action="top-coins" class="hover:text-brand">Top 100 Coins</a></li>
         </ul>
       </div>
       <div>
         <div class="uppercase text-xs text-neutral-400">TOP RWA COIN 🏦</div>
         <ul class="space-y-2 mt-1">
-          <li><a href="#" data-action="top-rwa" class="hover:text-brand">Top Real World Asset</a></li>
+          <li><a href="top-rwa.html" data-action="top-rwa" class="hover:text-brand">Top Real World Asset</a></li>
         </ul>
       </div>
       <div>
         <div class="uppercase text-xs text-neutral-400">TRENDING 📈</div>
         <ul class="space-y-2 mt-1">
-          <li><a href="#" data-action="trending" class="hover:text-brand">Trending Coins</a></li>
+          <li><a href="trending.html" data-action="trending" class="hover:text-brand">Trending Coins</a></li>
         </ul>
       </div>
     </nav>
