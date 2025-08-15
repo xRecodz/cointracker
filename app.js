@@ -52,7 +52,6 @@ function App() {
     if (coins.length > 0) coins.forEach(c => buildSparkline(c));
   }, [coins]);
 
-  /* Data Loader Functions */
   async function loadTopCoins() {
     const data = await api.coins();
     setCoins(data);
@@ -90,7 +89,16 @@ function App() {
     const ctx = document.getElementById("cryptoChart").getContext("2d");
     const newChart = new Chart(ctx, {
       type: "line",
-      data: { labels, datasets: [{ data: prices, borderColor: "#F4C542", backgroundColor: "rgba(244,197,66,0.1)", fill: true, tension: 0.3 }] },
+      data: {
+        labels,
+        datasets: [{
+          data: prices,
+          borderColor: "#F4C542",
+          backgroundColor: "rgba(244,197,66,0.1)",
+          fill: true,
+          tension: 0.3
+        }]
+      },
       options: { responsive: true, plugins: { legend: { display: false } } }
     });
     setChartInstance(newChart);
@@ -105,7 +113,11 @@ function App() {
     <>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {coins.map((c) => (
-          <div key={c.id} onClick={() => openCoinModal(c)} className="rounded-2xl bg-neutral-900/50 border border-white/10 p-4 cursor-pointer hover:bg-neutral-800/50 transition flex flex-col">
+          <div
+            key={c.id}
+            onClick={() => openCoinModal(c)}
+            className="rounded-2xl bg-neutral-900/50 border border-white/10 p-4 cursor-pointer hover:bg-neutral-800/50 transition flex flex-col"
+          >
             <div className="flex items-center gap-2">
               <img src={c.image} alt={c.symbol} className="h-7 w-7 rounded-full" />
               <span className="font-semibold">{c.name}</span>
@@ -114,12 +126,13 @@ function App() {
             <div className={`text-sm mt-1 ${c.price_change_percentage_24h >= 0 ? "text-green-400" : "text-red-400"}`}>
               {c.price_change_percentage_24h?.toFixed(2)}%
             </div>
-            <div className="h-10 mt-2"><canvas id={`spark-${c.id}`}></canvas></div>
+            <div className="h-10 mt-2">
+              <canvas id={`spark-${c.id}`}></canvas>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Modal */}
       <div id="coinModal" className="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
         <div className="bg-neutral-900 p-6 rounded-xl border border-white/10 max-w-2xl w-full">
           <div className="flex justify-between items-center mb-4">
@@ -140,7 +153,6 @@ function App() {
   );
 }
 
-/* Sparkline */
 function buildSparkline(coin) {
   const ctx = document.getElementById(`spark-${coin.id}`);
   if (!ctx) return;
@@ -155,7 +167,6 @@ function buildSparkline(coin) {
   });
 }
 
-/* Theme toggle */
 function themeInit() {
   const root = document.documentElement;
   const btn = document.getElementById("themeToggle");
@@ -169,18 +180,8 @@ function themeInit() {
   };
 }
 
-/* Sidebar toggle & menu click binding */
 function menuInit() {
   const sidebar = document.getElementById("sidebar");
-  const mainContent = document.getElementById("mainContent");
-
-  document.getElementById("menuBtn").onclick = () => {
-    const collapsed = sidebar.classList.toggle("collapsed");
-    if (window.innerWidth >= 768) {
-      mainContent.classList.toggle("sidebar-closed", collapsed);
-      mainContent.classList.toggle("sidebar-open", !collapsed);
-    }
-  };
 
   document.querySelectorAll("#sidebar a[data-action]").forEach(link => {
     link.addEventListener("click", (e) => {
@@ -190,12 +191,13 @@ function menuInit() {
       if (act === "top-coins") loadTopCoins();
       if (act === "top-rwa") loadRWACoins();
       if (act === "trending") loadTrendingCoins();
-      if (window.innerWidth < 768) sidebar.classList.add("collapsed");
+      if (window.innerWidth < 768) {
+        sidebar.classList.add("-translate-x-full");
+      }
     });
   });
 }
 
-/* Chain selector */
 function chainInit() {
   const btn = document.getElementById("chainBtn");
   const menu = document.getElementById("chainMenu");
@@ -219,60 +221,54 @@ function chainInit() {
   document.addEventListener("click", (e) => { if (!btn.contains(e.target) && !menu.contains(e.target)) menu.classList.add("hidden"); });
 }
 
-/* Wallet connect */
 function connectWalletInit() {
-    const connectBtn = document.getElementById("connectBtn");
-    const profile = document.getElementById("walletProfile");
-    const walletBtn = document.getElementById("walletBtn");
-    const walletBalanceText = document.getElementById("walletBalanceText");
-    const addrShort = document.getElementById("walletAddrShort");
-    const dropdown = document.getElementById("walletDropdown");
-  
-    connectBtn.onclick = async () => {
-      if (!window.ethereum) return alert("MetaMask not found");
-      try {
-        const provider = new ethers.BrowserProvider(window.ethereum);
-        await provider.send("eth_requestAccounts", []);
-        const signer = await provider.getSigner();
-        const addr = await signer.getAddress();
-        const balance = await provider.getBalance(addr);
-        const eth = parseFloat(ethers.formatEther(balance));
-        const cgId = CHAINS.ethereum.cgId; // default
-        const price = (await api.simplePrice(cgId))[cgId].usd;
-        const usdValue = fmtUSD(eth * price);
-  
-        // Set UI
-        walletBalanceText.textContent = usdValue;
-        addrShort.textContent = addr.slice(0, 6) + "..." + addr.slice(-4);
-  
-        connectBtn.classList.add("hidden");
-        profile.classList.remove("hidden");
-      } catch (err) {
-        console.error(err);
-      }
-    };
-  
-    // Klik profil wallet → toggle dropdown
-    walletBtn.onclick = () => {
-      dropdown.classList.toggle("hidden");
-    };
-  
-    // Disconnect
-    document.getElementById("disconnectWallet").onclick = () => {
-      profile.classList.add("hidden");
-      dropdown.classList.add("hidden");
-      connectBtn.classList.remove("hidden");
-    };
-  
-    // Klik luar menutup dropdown
-    document.addEventListener("click", (e) => {
-      if (!walletBtn.contains(e.target) && !dropdown.contains(e.target)) {
-        dropdown.classList.add("hidden");
-      }
-    });
-  }
+  const connectBtn = document.getElementById("connectBtn");
+  const profile = document.getElementById("walletProfile");
+  const walletBtn = document.getElementById("walletBtn");
+  const walletBalanceText = document.getElementById("walletBalanceText");
+  const addrShort = document.getElementById("walletAddrShort");
+  const dropdown = document.getElementById("walletDropdown");
 
-/* Refresh wallet balance */
+  connectBtn.onclick = async () => {
+    if (!window.ethereum) return alert("MetaMask not found");
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = await provider.getSigner();
+      const addr = await signer.getAddress();
+      const balance = await provider.getBalance(addr);
+      const eth = parseFloat(ethers.formatEther(balance));
+      const cgId = CHAINS.ethereum.cgId;
+      const price = (await api.simplePrice(cgId))[cgId].usd;
+      const usdValue = fmtUSD(eth * price);
+
+      walletBalanceText.textContent = usdValue;
+      addrShort.textContent = addr.slice(0, 6) + "..." + addr.slice(-4);
+
+      connectBtn.classList.add("hidden");
+      profile.classList.remove("hidden");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  walletBtn.onclick = () => {
+    dropdown.classList.toggle("hidden");
+  };
+
+  document.getElementById("disconnectWallet").onclick = () => {
+    profile.classList.add("hidden");
+    dropdown.classList.add("hidden");
+    connectBtn.classList.remove("hidden");
+  };
+
+  document.addEventListener("click", (e) => {
+    if (!walletBtn.contains(e.target) && !dropdown.contains(e.target)) {
+      dropdown.classList.add("hidden");
+    }
+  });
+}
+
 async function refreshBalance(key) {
   try {
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -285,7 +281,6 @@ async function refreshBalance(key) {
   } catch (e) { console.error(e); }
 }
 
-/* Build bottom ticker */
 function buildTicker(data) {
   const inner = document.getElementById("tickerInner");
   inner.innerHTML = "";
